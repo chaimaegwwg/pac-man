@@ -5,7 +5,7 @@ def display(screen):
     pygame.init()
     white = (255, 255, 255)
     black = (0, 0, 0)
-    cell_size = 20
+    cell_size = 40
     generator = MazeGenerator(
         size=(15, 15),
         perfect=False,
@@ -13,20 +13,49 @@ def display(screen):
         exit_cell=(-1, -1),
         seed=0
     )
-    for index_x, x in enumerate(generator.maze):
-        for index_y, y in enumerate(x):
-            if index_x % 2 == 0:
-                print("----",end=" ")
-            if index_x % 2!= 0:
-                print("|",end="   ")
-        print()
+    print(generator.maze)
+    for row, line in enumerate(generator.maze):
+        for col, cell in enumerate(line):
+            x = col * cell_size
+            y = row * cell_size
+
+            # Top
+            if cell & 1:
+                pygame.draw.line(
+                    screen, (0, 0, 0),
+                    (x, y),
+                    (x + cell_size, y),
+                    2
+                )
+
+            # Right
+            if cell & 2:
+                pygame.draw.line(
+                    screen, (0, 0, 0),
+                    (x + cell_size, y),
+                    (x + cell_size, y + cell_size),
+                    2
+                )
+
+            # Bottom
+            if cell & 4:
+                pygame.draw.line(
+                    screen, (0, 0, 0),
+                    (x, y + cell_size),
+                    (x + cell_size, y + cell_size),
+                    2
+                )
+
+            # Left
+            if cell & 8:
+                pygame.draw.line(
+                    screen, (0, 0, 0),
+                    (x, y),
+                    (x, y + cell_size),
+                    2
+                )
         
-            # pygame.draw.rect(screen, black, (x,y,10,10))
-
-
-
-    #         pygame.draw.line(sc, pygame.Color('darkgreen'), (x, y), (x + tile, y), self.thickness)
-
+            
 
 screen = pygame.display.set_mode((800,800))
 white = (255, 255, 255)
@@ -41,4 +70,5 @@ while running:
     pygame.display.flip()
 
 pygame.quit()   
+sys.exit()
 # print(generator.maze)
