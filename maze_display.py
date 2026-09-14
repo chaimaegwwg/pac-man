@@ -16,9 +16,11 @@ def display(screen):
     for index_x, x in enumerate(generator.maze):
         for index_y, y in enumerate(x):
             if index_x % 2 == 0:
-                print("---")
+                print("----",end=" ")
+            if index_x % 2!= 0:
+                print("|",end="   ")
+        print()
         
-            print("|")
             # pygame.draw.rect(screen, black, (x,y,10,10))
 
 
