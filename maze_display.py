@@ -35,16 +35,17 @@ def display(screen,generator,pos):
 #from now i will like just test that and i will start from 0,0 after that i will change it to the middle
 def ft_check_walls(pos, row , col,generator):
     cell = generator.maze[row][col]
-    if pos[0] == 1:
+    
+    if pos == [0,1]:
         if cell & 2:
             return False
-    if pos[0] == -1:
+    if pos == [0,-1]:
         if cell & 8:
             return False
-    if pos[1] == 1:
+    if pos == [1,0]:
         if cell & 4:
             return False
-    if pos[1] == -1:
+    if pos == [-1,0]:
         if cell & 1:
             return False
     return True
@@ -58,6 +59,8 @@ start_to = 5
 # pacman = pygame.image.load("pacman_up.png")
 # screen.blit(pacman, (x, y))
 pygame.init()
+pos = None
+pending_pos = None
 #this is for not each time i will press the key
 
 character_pacman = "@"
@@ -76,10 +79,10 @@ font = pygame.font.Font(None, 40)
 running = True
 pos= None
 directions = { 
-    pygame.K_RIGHT :[1,0], 
-    pygame.K_LEFT: [-1,0], 
-    pygame.K_UP: [0,-1], 
-    pygame.K_DOWN:[0,1] 
+    pygame.K_RIGHT :[0,1], 
+    pygame.K_LEFT: [0,-1], 
+    pygame.K_UP: [-1,0], 
+    pygame.K_DOWN:[1,0] 
 }
 step_x = 0
 step_y = 0
@@ -92,28 +95,31 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key in directions:
-                pos = directions[event.key]
+                pending_pos = directions[event.key]
+    if pending_pos is not None and step_x == 0 and step_y == 0:
+            pos = pending_pos
+            pending_pos = None
     if pos:
         row = position_pacman[0]
         col = position_pacman[1]
         if ft_check_walls(pos,row,col,generator):
-            step_x += pos[0] * 5.3
-            step_y += pos[1] * 5.3
+            step_x += pos[1] * 5
+            step_y += pos[0] * 5
             if abs(step_x) >= size_cell:
-                step_x = 0 
-                position_pacman[1] += pos[0]
+                step_x = 0
+                position_pacman[1] += pos[1]
+              
             if abs(step_y) >= size_cell:
                 step_y = 0
-                position_pacman[0] += pos[1]
-        x = (position_pacman[1] * size_cell) + step_x
-        y = (position_pacman[0] * size_cell) + step_y
+                position_pacman[0] += pos[0]
+                
+    x = (position_pacman[1] * size_cell) + step_x
+    y = (position_pacman[0] * size_cell) + step_y
 
-        x += (size_cell - pacman.get_width()) // 2
-        y += (size_cell - pacman.get_height()) // 2
     screen.fill(background)
     display(screen,generator,pos)
     pacman = font.render("@", True, (255, 255, 0))
-    screen.blit(pacman, (x, y))
+    screen.blit(pacman, (x+10, y+5))
     pygame.display.flip()
     clock.tick(30)
 
