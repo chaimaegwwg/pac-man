@@ -25,8 +25,17 @@ and the logic
 
 =>next mission :
 
-replace the @ and pac-gum with the right character
 Ghost
+
+---> find first all path to the pac-man
+not finished yet iam wroking to fix the logic on it today
+
+
+--> make just on first one ghost
+
+
+
+replace the @ and pac-gum with the right character
 
 add the try and the exception 
 
