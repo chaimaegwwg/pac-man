@@ -11,3 +11,19 @@ support additional comment styles (e.g., C or C++).
 # -----> but the json file doesn't support comments like # // etc. ask Noaman or someone else about if we must use exactly a json file or just .txt file is ok.
 
 --> render the menu of pac-man u can check subject for more details and the menu of the last
+
+
+
+###       infos:
+
+# -----> load() vs loads()
+
+This is an important Python distinction:
+
+json.load(file)
+
+➡️ Reads JSON from a file
+
+json.loads(string)
+
+➡️ Reads JSON from a string
