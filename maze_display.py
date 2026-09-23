@@ -58,33 +58,27 @@ def ft_check_walls(pos, row , col,generator):
         if cell & 1:
             return False
     return True
+
+
 def ft_find_paths(generator,position_pacman,pos_ghost,directions,size):
     paths = []
-    # paths.append(pos_ghost)
-    current = []
+    current = [pos_ghost[0],pos_ghost[1]]
     all_paths = []
-    current_ghost_x = pos_ghost[0]
-    current_ghost_y = pos_ghost[1]
     def recursion_dfs(path,current):
         # print("======>", current)
         if current == position_pacman:
             all_paths.append(path.copy())
+            return
         else:
             for x, y in directions:
                 pos = [x, y]
-                # pos_ghost[0] += x 
-                # pos_ghost[1] += y
-                current_ghost_x += x
-                current_ghost_y += y
-                current = [current_ghost_x, current_ghost_y]
-                if current in path:
+                if [current[0]+x ,current[1]+y] in path:
                     continue
-                if 0 <= pos_ghost[0] <= size[0]-1 and 0 <= pos_ghost[1] <= size[1] -1:
-                    if ft_check_walls(pos,pos_ghost[0]+x,pos_ghost[1]+y,generator):
+                if 0 <= current[0] <= size[0]-1 and 0 <= current[1] <= size[1] -1:
+                    if ft_check_walls(pos,current[0],current[1],generator):
                         path.append(current)
-                        recursion_dfs(path,current)
-                
-        path.pop()
+                        recursion_dfs(path,[current[0]+x, current[1]+y])
+            path.pop()
 
     recursion_dfs([],current)
     return all_paths
@@ -93,11 +87,13 @@ def ft_find_paths(generator,position_pacman,pos_ghost,directions,size):
 
 def ft_position_ghost(size,generator,position_pacman):
     directions = [[1,0],[-1,0],[0,-1],[0,1]]
-    random_spot_x = random.randint(0,size[0]-1)
-    random_spot_y = random.randint(0,size[1]-1)
+    random_spot_x = 0
+    random_spot_y = size[1]-1
     position_ghost = [random_spot_x,random_spot_y]
 
-    ft_find_paths(generator,position_pacman,position_ghost,directions,size)
+    path = ft_find_paths(generator,position_pacman,position_ghost,directions,size)
+
+    print(path)
 
 
 def main():

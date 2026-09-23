@@ -23,9 +23,11 @@ display:   super-pacgum and make it count it
 and the logic
 --> done
 
-=>next mission :
+==>next mission Ghost:
 
-Ghost
+
+=>find the paths that i will need 
+
 
 ---> find first all path to the pac-man
 not finished yet iam wroking to fix the logic on it today
