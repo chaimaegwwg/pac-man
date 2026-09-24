@@ -1,6 +1,7 @@
 from mazegenerator import MazeGenerator
 import pygame, sys
 import random
+import time
 
 
 def display(screen,generator,pos,food,super_pacgums):
@@ -78,7 +79,7 @@ def ft_find_paths(generator,position_pacman,pos_ghost,directions,size):
                     if ft_check_walls(pos,current[0],current[1],generator):
                         path.append(current)
                         recursion_dfs(path,[current[0]+x, current[1]+y])
-            path.pop()
+                        path.pop()
 
     recursion_dfs([],current)
     return all_paths
@@ -91,9 +92,24 @@ def ft_position_ghost(size,generator,position_pacman):
     random_spot_y = size[1]-1
     position_ghost = [random_spot_x,random_spot_y]
 
-    path = ft_find_paths(generator,position_pacman,position_ghost,directions,size)
+    paths = ft_find_paths(generator,position_pacman,position_ghost,directions,size)
 
-    print(path)
+    return paths
+def ft_render_paths_debug(paths, screen, size_cell, show_path, p):
+    n = [(255, 255, 255), (255, 0, 0), (0, 255, 0),
+         (0, 255, 255), (255, 215, 0)]
+
+    if show_path and p < len(paths):
+        for y in paths[p]:
+            row = y[0]
+            col = y[1]
+
+            font = pygame.font.Font(None, 40)
+            path = font.render("P", True, n[p % len(n)])
+            screen.blit(path, ((col * size_cell) + 5,(row * size_cell) + 10))
+        p += 1
+
+    return p
 
 
 def main():
@@ -104,6 +120,11 @@ def main():
     start_to = 5
     # pacman = pygame.image.load("pacman_up.png")
     # screen.blit(pacman, (x, y))
+    p = 0
+    show_path = False
+
+
+
     pygame.init()
     pos = None
     pending_pos = None
@@ -112,7 +133,7 @@ def main():
     checker_x = 0
     checker_y = 0
     background = (15, 15, 20)
-    size=(15, 15)
+    size=(5, 5)
     generator = MazeGenerator(
             size,
             perfect=False,
@@ -135,7 +156,7 @@ def main():
     step_y = 0
     # random_spot_x = random.randint(0,size[0]-1)
     # random_spot_y = random.randint(0,size[1]-1)
-    spot_ghost = ft_position_ghost(size, generator,position_pacman)
+    paths = ft_position_ghost(size, generator,position_pacman)
     x=0
     y=0
     food = None
@@ -147,10 +168,12 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key in directions:
                     pending_pos = directions[event.key]
+                if event.key == pygame.K_SPACE:
+                    show_path = True
         if pending_pos is not None and step_x == 0 and step_y == 0:
                 pos = pending_pos
                 pending_pos = None
-
+        
         if pos:
             row = position_pacman[0]
             col = position_pacman[1]
@@ -181,6 +204,10 @@ def main():
         # screen.blit(ghost,(,))
         pacman = font.render("@", True, (255, 255, 0))
         screen.blit(pacman, (x+10, y+10))
+        p = ft_render_paths_debug(paths,screen,size_cell,show_path,p)
+        pygame.time.get_ticks()
+
+        show_path = False
         pygame.display.flip()
         clock.tick(60)
 

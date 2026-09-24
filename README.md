@@ -25,21 +25,29 @@ and the logic
 
 ==>next mission Ghost:
 
-
-=>find the paths that i will need 
-
-
+-->find the paths that i will need 
 ---> find first all path to the pac-man
-not finished yet iam wroking to fix the logic on it today
+
+-->done
+
+==> make just on first one ghost
+
+-> make 4 Ghost each have here own path
+-> start on a point 
 
 
---> make just on first one ghost
+
+-> if the ghost touch pac-man, pac-man will like visual render and disappear in the same time
+-> if pac-man take pac-gum here the ghost take another path to go in it , and the ghost will disappear if pac-man touch it 
+-> after like 2 min the ghosts will return to there state
+-> and that one how make touch with ghost will return to there place 
+-> the speed of the ghost will lose it 
 
 
 
-replace the @ and pac-gum with the right character
+->replace the @ and pac-gum with the right character
 
-add the try and the exception 
+->add the try and the exception 
 
 
 
