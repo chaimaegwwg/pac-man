@@ -26,13 +26,22 @@ and the logic
 ==>next mission Ghost:
 
 -->find the paths that i will need 
+
+
+=>;( i should to chang the dfs to bfs 
+
 ---> find first all path to the pac-man
 
--->done
+<!-- not done yet-->done -->
 
 ==> make just on first one ghost
 
 -> make 4 Ghost each have here own path
+make sure this coordination not like player coordination or other ghosts coordination or a wall that close all
+
+
+
+
 -> start on a point 
 
 
