@@ -4,13 +4,15 @@ import random
 import time
 
 class Render:
-    def __init__(self, size,size_cell,screen,directions,generator,len_path):
+    def __init__(self, size,size_cell,screen,directions,generator,len_path,speed_x,speed_y):
         self.size = size
         self.size_cell = size_cell
         self.screen = screen
         self.directions = directions
         self.generator = generator
         self.len_path = len_path
+        self.speed_ghost_x = speed_x
+        self.speed_ghost_y = speed_y
     def display(self,pos,food,super_pacgums):
         pygame.init()
         black = (0, 0, 0)
@@ -68,26 +70,30 @@ class Render:
 
     def ft_find_paths(self,position_pacman,pos_ghost):
         paths = []
+        n = 0
         directions = self.directions
         current = [pos_ghost[0],pos_ghost[1]]
         all_paths = []
-        def recursion_dfs(path,current):
+        def recursion_dfs(path,current,n):
             # print("======>", current)
             if current == position_pacman:
                 all_paths.append(path.copy())
+                n +=1
                 return
             else:
                 for x, y in directions:
                     pos = [x, y]
+                    if n == 2:
+                        return
                     if [current[0]+x ,current[1]+y] in path:
                         continue
                     if 0 <= current[0] <= self.size[0]-1 and 0 <= current[1] <= self.size[1] -1:
                         if self.ft_check_walls(pos,current[0],current[1]):
                             path.append(current)
-                            recursion_dfs(path,[current[0]+x, current[1]+y])
+                            recursion_dfs(path,[current[0]+x, current[1]+y],n)
                             path.pop()
 
-        recursion_dfs([],current)
+        recursion_dfs([],current,n)
         return all_paths
 
 
@@ -135,6 +141,7 @@ class Render:
             p += 1
 
         return p
+    
     def move_ghost(self, ghost_x,ghost_y,paths,p):
         if not paths:
             return ghost_x,ghost_y,p
@@ -152,8 +159,27 @@ class Render:
         ghost_x += row - ghost_x
         ghost_y += col - ghost_y
         p+=1
-        return ghost_x,ghost_y,p
+        return ghost_x,ghost_y,p,[row,col]
 
+    def ft_speed_ghost(self,ghost_x,ghost_y,paths,p,pos):
+        if self.size_cell < self.speed_ghost_x:
+            self.speed_ghost_x = 0
+            ghost_x = 0
+            ghost_x,ghost_y,p = self.move_ghost(ghost_x,ghost_y,paths,p)
+        if self.size_cell < self.speed_ghost_y:
+            self.speed_ghost_y = 0
+            ghost_y = 0
+            ghost_x,ghost_y,p,pos = self.move_ghost(ghost_x,ghost_y,paths,p)
+        else:
+            if pos is None:
+                ghost_x,ghost_y,p,pos = self.move_ghost(ghost_x,ghost_y,paths,p)
+            ghost_x += pos[0] *3
+            ghost_y +=pos[1]*3
+            return ghost_x, ghost_y,p
+        return self.move_ghost(ghost_x,ghost_y,paths,p)
+
+            
+        
 
 
 def main():
@@ -178,7 +204,9 @@ def main():
     directions_wall = [[1,0],[-1,0],[0,-1],[0,1]]
     width, height = screen.get_size()
     size_cell = min(width//size[0],height//size[1])
-    render = Render(size, size_cell, screen,directions_wall,generator,0)
+    speed_x = 0
+    speed_y = 0
+    render = Render(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y)
     super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
     font = pygame.font.Font(None, 40)
     running = True
@@ -191,6 +219,8 @@ def main():
     }
     step_x = 0
     step_y = 0
+    po_s = None
+    
     p = 0
     position_ghost = [0,0]
     paths = []
@@ -236,15 +266,21 @@ def main():
                         if [position_pacman[0],col] in super_pacgums:
                             print("iiiii eaat it also",position_pacman[0],col)
                             super_pacgums.remove([position_pacman[0],col])
-        ghost_x,ghost_y,p = render.move_ghost(ghost_x,ghost_y,paths,p)
+
+        ghost_x,ghost_y,p = render.ft_speed_ghost(ghost_x,ghost_y,paths,p,po_s)
+        
         x = (position_pacman[1] * size_cell) + step_x
         y = (position_pacman[0] * size_cell) + step_y
+
         screen.fill(background)
         food,super_pacgums = render.display(pos,food,super_pacgums)
+        
         ghost = font.render("G", True, (255, 255, 255))
         screen.blit(ghost,(ghost_y*size_cell,ghost_x*size_cell))
+        
         pacman = font.render("@", True, (255, 255, 0))
         screen.blit(pacman, (x+10, y+10))
+        
         p = render.ft_render_paths_debug(paths,show_path,p)
         pygame.time.get_ticks()
 
