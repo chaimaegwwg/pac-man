@@ -4,6 +4,7 @@ MANDATORY_KEYS = (
     "highscore_filename", "lives", "points_per_pacgum", 
     "points_per_super_pacgum", "points_per_ghost"
 )
+
 OPTIONAL_KEYS = ("level_max_time")
 
 def read_file_without_cmts(file_name):
@@ -48,6 +49,18 @@ def check_lives(lives):
     if lives > 5 or lives < 1:
         raise ValueError("lives must be between 1 and 5")
 
+def check_points(points):
+    if not isinstance(points, int):
+        raise ValueError("points must be integer")
+
+    if points < 1 or points > 1000:
+        raise ValueError("points must be between 1 and 1000")
+
+def check_level_max_time(js_content):
+    if not isinstance(js_content["level_max_time"], int):
+        raise ValueError("points must be integer")
+    if js_content["level_max_time"] < 20:
+        raise ValueError("level_max_time should be between 20 and 120")
 
 
 content = read_file_without_cmts("config/config.json")
@@ -57,4 +70,10 @@ js_content = json.loads(content)
 check_key_exesting(js_content)
 check_highscore_filename(js_content["highscore_filename"])
 check_lives(js_content["lives"])
+check_points(js_content["points_per_pacgum"])
+check_points(js_content["points_per_super_pacgum"])
+check_points(js_content["points_per_ghost"])
+if "level_max_time" in js_content:
+    check_level_max_time(js_content)
+
 print(js_content)
