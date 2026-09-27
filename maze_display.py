@@ -125,6 +125,7 @@ class Render:
         return [random_spot_x,random_spot_y],paths
 
         return paths
+
     def ft_render_paths_debug(self,paths, show_path, p):
         n = [(255, 255, 255), (255, 0, 0), (0, 255, 0),
             (0, 255, 255), (255, 215, 0)]
@@ -173,17 +174,15 @@ class Render:
         else:
             if pos is None:
                 ghost_x,ghost_y,p,pos = self.move_ghost(ghost_x,ghost_y,paths,p)
-            ghost_x += pos[0] *3
-            ghost_y +=pos[1]*3
+            ghost_x += pos[0] *1
+            ghost_y +=pos[1]*1
             return ghost_x, ghost_y,p
         return self.move_ghost(ghost_x,ghost_y,paths,p)
 
-            
-        
 
 
 def main():
-    screen = pygame.display.set_mode((800,800))
+    
     p = 0
     show_path = False
 
@@ -193,6 +192,7 @@ def main():
     character_pacman = "@"
     position_pacman = [0,0]
     background = (15, 15, 20)
+    #==> false size=(14, 24)
     size=(8, 8)
     generator = MazeGenerator(
             size,
@@ -202,8 +202,9 @@ def main():
             seed=0
         )
     directions_wall = [[1,0],[-1,0],[0,-1],[0,1]]
+    screen = pygame.display.set_mode((size[1]*50,size[0]*50))
     width, height = screen.get_size()
-    size_cell = min(width//size[0],height//size[1])
+    size_cell = min(width//size[1],height//size[0])
     speed_x = 0
     speed_y = 0
     render = Render(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y)
@@ -211,12 +212,14 @@ def main():
     font = pygame.font.Font(None, 40)
     running = True
     pos= None
+
     directions = { 
         pygame.K_RIGHT :[0,1], 
         pygame.K_LEFT: [0,-1], 
         pygame.K_UP: [-1,0], 
         pygame.K_DOWN:[1,0] 
     }
+
     step_x = 0
     step_y = 0
     po_s = None
@@ -231,6 +234,7 @@ def main():
     y = 0
     food = None
     clock = pygame.time.Clock()
+    
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -286,10 +290,11 @@ def main():
 
         show_path = False
         pygame.display.flip()
+        
         clock.tick(60)
-
 
     pygame.quit()   
     sys.exit()
+
 
 main()

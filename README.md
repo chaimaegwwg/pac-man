@@ -42,6 +42,78 @@ make sure this coordination not like player coordination or other ghosts coordin
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -> start on a point 
 
 
@@ -57,6 +129,15 @@ make sure this coordination not like player coordination or other ghosts coordin
 ->replace the @ and pac-gum with the right character
 
 ->add the try and the exception 
+
+
+
+
+
+
+
+
+=> solve it later ==> false size=(14, 24)
 
 
 
