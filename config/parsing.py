@@ -5,7 +5,7 @@ MANDATORY_KEYS = (
     "points_per_super_pacgum", "points_per_ghost"
 )
 
-OPTIONAL_KEYS = ("level_max_time")
+OPTIONAL_KEYS = ("level_max_time",)
 
 def read_file_without_cmts(file_name):
     lines = []
