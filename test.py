@@ -5,7 +5,7 @@ class Solution(object):
         queue = {}
         visited = []
         d = [0,0]
-       
+
         def recursion(current, previous):
             neighbors = []
             # if current == [len(grid) - 1, len(grid) - 1]:
@@ -18,7 +18,6 @@ class Solution(object):
             # if (current[0],current[1]) not in queue:
             #     queue[(current[0],current[1])] = (previous[0],previous[1])
             # previous = current
-
             # visited.append(current)
             current = [0, 0]
             previous = [0, 0]
@@ -65,12 +64,6 @@ class Solution(object):
         return queue
 
 
-
-
-
-
-
-
 def main():
     s = Solution()
     res = s.shortestPathBinaryMatrix([
@@ -81,6 +74,5 @@ def main():
     [0, 0, 0, 0, 0]
 ])
     print(res)
-
 
 main()
