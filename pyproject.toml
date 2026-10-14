@@ -6,12 +6,14 @@ readme = "README.md"
 authors = [
     { name = "fbendnan", email = "fatimazahrabendnane@gmail.com" }
 ]
-requires-python = ">=3.14"
-dependencies = []
+requires-python = ">=3.13"
+dependencies = [
+    "pygame>=2.6.1",
+]
 
 [project.scripts]
 pacman = "pacman:main"
 
 [build-system]
-requires = ["uv_build>=0.12.6,<0.13.0"]
+requires = ["uv_build>=0.12.21,<0.13.0"]
 build-backend = "uv_build"

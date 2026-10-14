@@ -27,3 +27,11 @@ json.load(file)
 json.loads(string)
 
 ➡️ Reads JSON from a string
+
+
+# --> clock utility 
+-----> Without clock.tick(60)
+The loop runs as fast as possible, potentially consuming more CPU.
+
+------> With clock.tick(60)
+The loop is limited to about 60 iterations per second, or one iteration every 16.7 ms.
