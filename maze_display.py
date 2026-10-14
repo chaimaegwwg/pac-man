@@ -1,7 +1,9 @@
 from mazegenerator import MazeGenerator
+from collections import deque
 import pygame, sys
 import random
 import time
+
 class Player:
     def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,n):
         self.size = size
@@ -13,6 +15,7 @@ class Player:
         self.speed_ghost_x = speed_x
         self.speed_ghost_y = speed_y
         self.n = n
+        
     def display(self,pos,food,super_pacgums):
         pygame.init()
         black = (0, 0, 0)
@@ -66,33 +69,48 @@ class Player:
             if cell & 1:
                 return False
         return True
-    def ft_find_paths(self,position_pacman,pos_ghost,num):
+    def ft_find_paths_bfs(self,position_pacman,pos_ghost,num):
         paths = []
         directions = self.directions
-        current = [pos_ghost[0],pos_ghost[1]]
-        self.n = num
-        all_paths = []
-        def recursion_dfs(path,current):
-            # print("======>", current)
-            if current == position_pacman:
-                all_paths.append(path.copy())
-                self.n +=1
-                return
-            if self.n == 1:
-                return
-            else:
-                for x, y in directions:
-                    pos = [x, y]
-                    if [current[0]+x ,current[1]+y] in path:
-                        continue
-                    if 0 <= current[0] <= self.size[0]-1 and 0 <= current[1] <= self.size[1] -1:
-                        if self.ft_check_walls(pos,current[0],current[1]):
-                            path.append(current)
-                            recursion_dfs(path,[current[0]+x, current[1]+y])
-                            path.pop()
+        prev = [0, 0]
+        queue = {}
+        visited = set() 
+        current = [0,0]
+        visited.add(tuple(current))
+        to_visit = deque([current]) 
+        while to_visit:
+            current = to_visit.popleft()
+            if current == [position_pacman[0], position_pacman[1]]:
+                break
+            neighbors = []
+            for i in directions:
+                x, y = i
+                nx, ny = current[0] - x, current[1] - y
+                if nx < 0 or ny < 0 or nx > self.size[0] - 1 or ny > self.size[1] - 1:
+                    continue
+                if (nx, ny) in visited or not self.ft_check_walls((nx,ny),current[0],current[1]):
+                    continue
+                
+                neighbors.append([nx, ny])
+            for n in neighbors:
+                visited.add(tuple(n))
+                queue[tuple(n)] = tuple(current)
+                to_visit.append(n)
 
-        recursion_dfs([],current)
-        return all_paths
+        res = []
+        prevs = (position_pacman[0], position_pacman[1])
+        res.append(list(prevs))
+        if tuple(prevs) not in queue:
+            return []
+        curr = prevs
+        while curr in queue:
+            curr = queue[curr]
+            res.append(list(curr))
+
+        res.reverse()
+        return res
+
+
 
 class Ghost:
     def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p):
@@ -109,29 +127,7 @@ class Ghost:
 
 
     def ft_position_ghost(self,position_pacman,position_ghost,n):
-        # r = self.size[0]//4
-        # c = self.size[1]//4
-        # check = False
-        # for i in range(20):
-        #     random_spot_x = random.randint(r*1,r*3)
-        #     random_spot_y = random.randint(c*1,c*3)
-        #     for i in self.directions:
-        #         if self.func.ft_check_walls(i ,random_spot_x,random_spot_y):
-        #             check = True
-        #             break
-        # if check == False:
-        #     for i in range(300):
-        #         random_spot_x = random.randint(0,self.size[0])
-        #         random_spot_y = random.randint(0,slef.size[1])
-        #         for i in self.directions:
-        #             if self.func.ft_check_walls(i ,random_spot_x,random_spot_y):
-        #                 check = True
-        #                 break
-        # if check == False:
-            # print("hereeeeeeee should i raise error :)")
-        # if check == True:    
-        # position_ghost = [random_spot_x,random_spot_y]
-        paths = self.func.ft_find_paths(position_pacman,position_ghost,n)
+        paths = self.func.ft_find_paths_bfs(position_pacman,position_ghost,n)
         return position_ghost,paths
 
         return paths
@@ -154,7 +150,7 @@ class Ghost:
         return p
     
     def move_ghost(self, ghost_x,ghost_y,paths):
-        if not paths or not paths[0]:
+        if not paths:
             return ghost_x, ghost_y, [0, 0]
 
         if len(paths) < self.len_path:
@@ -194,124 +190,129 @@ class Ghost:
            
         return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos
 
-def main():
-    
-    p = 1
-    show_path = False
 
-    pygame.init()
-    pos = None
-    pending_pos = None
-    character_pacman = "@"
-    position_pacman = [0,0]
-    background = (15, 15, 20)
-    speed_ghostx=0
-    speed_ghosty=0
-    size=(14, 14)
-    generator = MazeGenerator(
-            size,
-            perfect=False,
-            entry_cell=(0, 0),
-            exit_cell=(-1, -1),
-            seed=0
-        )
-    directions_wall = [[1,0],[-1,0],[0,-1],[0,1]]
-    screen = pygame.display.set_mode((size[1]*50,size[0]*50))
-    width, height = screen.get_size()
-    size_cell = min(width//size[1],height//size[0])
-    speed_x = 0
-    speed_y = 0
-    render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
-    ghost_func = Ghost(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0)
-    super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
-    font = pygame.font.Font(None, 40)
-    running = True
-    pos= None
+class Display:
+    def __init__(self):
+        pass
 
-    directions = { 
-        pygame.K_RIGHT :[0,1], 
-        pygame.K_LEFT: [0,-1], 
-        pygame.K_UP: [-1,0], 
-        pygame.K_DOWN:[1,0] 
-    }
-
-    step_x = 0
-    step_y = 0
-    po_s = None
-    
-
-    position_ghost = [size[0]-1,size[1]-1]
-    paths = []
-    position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,position_ghost,0)
- 
-    ghost_x = position_ghost[1]
-    ghost_y = position_ghost[0]
-    x = 0
-    y = 0
-    food = None
-    clock = pygame.time.Clock()
-    
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key in directions:
-                    pending_pos = directions[event.key]
-                if event.key == pygame.K_SPACE:
-                    show_path = True
-        if pending_pos is not None and step_x == 0 and step_y == 0:
-                pos = pending_pos
-                pending_pos = None
-        
-        if pos:
-            row = position_pacman[0]
-            col = position_pacman[1]
-            if render.ft_check_walls(pos,row,col):
-                step_x += pos[1] * 3
-                step_y += pos[0] * 3
-                if abs(step_x) >= size_cell:
-                    step_x = 0
-                    position_pacman[1] += pos[1]
-                    print("this the new path ==>",paths)
-                    position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
-                    if food:
-                        food[row][position_pacman[1]] = 20
-                        if [row,position_pacman[1]] in super_pacgums:
-                            super_pacgums.remove([row,position_pacman[1]])
-                
-                if abs(step_y) >= size_cell:
-                    step_y = 0
-                    position_pacman[0] += pos[0]
-                    position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
-                    print("this the new path ==>",paths)
-                    if food:
-                        food[position_pacman[0]][col] = 20
-                        if [position_pacman[0],col] in super_pacgums:
-                            super_pacgums.remove([position_pacman[0],col])
-
-        speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,paths,po_s)
-        x = (position_pacman[1] * size_cell) + step_x
-        y = (position_pacman[0] * size_cell) + step_y
-
-        screen.fill(background)
-        food,super_pacgums = render.display(pos,food,super_pacgums)
-        
-        ghost = font.render("G", True, (255, 255, 255))
-        screen.blit(ghost,((ghost_x*size_cell)+speed_ghostx+10,(ghost_y*size_cell)+speed_ghosty+10))
-        
-        pacman = font.render("@", True, (255, 255, 0))
-        screen.blit(pacman, (x+10, y+10))
-        
-        p = ghost_func.ft_render_paths_debug(paths,show_path,p)
-        pygame.time.get_ticks()
-
+    def run(self):
+        p = 1
         show_path = False
-        pygame.display.flip()
+
+        pygame.init()
+        pos = None
+        pending_pos = None
+        character_pacman = "@"
+        position_pacman = [0, 0]
+        background = (15, 15, 20)
+        speed_ghostx=0
+        speed_ghosty=0
+        size=(14, 14)
+        generator = MazeGenerator(
+                size,
+                perfect=False,
+                entry_cell=(0, 0),
+                exit_cell=(-1, -1),
+                seed=0
+            )
+        directions_wall = [[1,0],[-1,0],[0,-1],[0,1]]
+        screen = pygame.display.set_mode((size[1]*50,size[0]*50))
+        width, height = screen.get_size()
+        size_cell = min(width//size[1],height//size[0])
+        speed_x = 0
+        speed_y = 0
+        render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
+        ghost_func = Ghost(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0)
+        super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
+        font = pygame.font.Font(None, 40)
+        running = True
+        pos= None
+
+        directions = { 
+            pygame.K_RIGHT :[0,1], 
+            pygame.K_LEFT: [0,-1], 
+            pygame.K_UP: [-1,0], 
+            pygame.K_DOWN:[1,0] 
+        }
+
+        step_x = 0
+        step_y = 0
+        po_s = None
         
-        clock.tick(60)
 
-    pygame.quit()   
-    sys.exit()
+        position_ghost = [size[0]-1,size[1]-1]
+        paths = []
+        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,position_ghost,0)
+     
+        ghost_x = position_ghost[1]
+        ghost_y = position_ghost[0]
+        x = 0
+        y = 0
+        food = None
+        clock = pygame.time.Clock()
+        
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key in directions:
+                        pending_pos = directions[event.key]
+                    if event.key == pygame.K_SPACE:
+                        show_path = True
+            if pending_pos is not None and step_x == 0 and step_y == 0:
+                    pos = pending_pos
+                    pending_pos = None
+            
+            if pos:
+                row = position_pacman[0]
+                col = position_pacman[1]
+                if render.ft_check_walls(pos,row,col):
+                    step_x += pos[1] * 3
+                    step_y += pos[0] * 3
+                    if abs(step_x) >= size_cell:
+                        step_x = 0
+                        position_pacman[1] += pos[1]
+                        print("this the new path ==>",paths)
+                        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
+                        if food:
+                            food[row][position_pacman[1]] = 20
+                            if [row,position_pacman[1]] in super_pacgums:
+                                super_pacgums.remove([row,position_pacman[1]])
+                    
+                    if abs(step_y) >= size_cell:
+                        step_y = 0
+                        position_pacman[0] += pos[0]
+                        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
+                        print("this the new path ==>",paths)
+                        if food:
+                            food[position_pacman[0]][col] = 20
+                            if [position_pacman[0],col] in super_pacgums:
+                                super_pacgums.remove([position_pacman[0],col])
 
-main()
+            speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,paths,po_s)
+            x = (position_pacman[1] * size_cell) + step_x
+            y = (position_pacman[0] * size_cell) + step_y
+
+            screen.fill(background)
+            food,super_pacgums = render.display(pos,food,super_pacgums)
+            
+            ghost = font.render("G", True, (255, 255, 255))
+            screen.blit(ghost,((ghost_x*size_cell)+speed_ghostx+10,(ghost_y*size_cell)+speed_ghosty+10))
+            
+            pacman = font.render("@", True, (255, 255, 0))
+            screen.blit(pacman, (x+10, y+10))
+            
+            p = ghost_func.ft_render_paths_debug(paths,show_path,p)
+            pygame.time.get_ticks()
+
+            show_path = False
+            pygame.display.flip()
+            
+            clock.tick(60)
+
+        pygame.quit()   
+        sys.exit()
+
+if __name__ == "__main__":
+    Display().run()
