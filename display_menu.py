@@ -11,6 +11,8 @@ class Menu:
         self.option_font = pygame.font.Font('WowDino-G33vP.ttf', 60)
         self.title_font1 = pygame.font.Font('PAC-FONT.TTF', 35)
         self.title_font2 = pygame.font.Font('PAC-FONT.TTF', 60)
+        start_text = self.option_font.render("press to start", True, (180, 21, 0))
+        self.start_rect = start_text.get_rect(center=(SCREEN_WIDTH//2, 500))
 
 
     def draw_centred_text(
@@ -20,6 +22,7 @@ class Menu:
         rect = rendered_text.get_rect(center=(SCREEN_WIDTH // 2, y))
         screen.blit(rendered_text, rect)
         # print(rect)
+        return rect
 
 
     def draw_button(self, screen):
@@ -31,23 +34,21 @@ class Menu:
 
     def draw_menu(self, screen):
         screen.fill((0, 0, 0))
-        # bg = pygame.image.load('img.png')
         screen.blit(self.bg, (0, 0))
-        # print(pygame.font.get_fonts())
-        # option_font = pygame.font.SysFont("lato", 60)
-        # title_font1 = pygame.font.Font('PAC-FONT.TTF', 35)
-        # title_font2 = pygame.font.Font('PAC-FONT.TTF', 60)
+        mouse_pos = pygame.mouse.get_pos()
 
-        # draw_centred_text(screen, "hello, center", test_font, 100)
-        # self.draw_button(screen)
+        hovered = self.start_rect.collidepoint(mouse_pos)
 
+        color = (255, 255, 255) if hovered else (180, 21, 0)
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND) if hovered else pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+    
         self.draw_centred_text(
             screen, "I WANNA BE A", self.title_font1, 100, (255, 255, 0)
         )
         self.draw_centred_text(
             screen, "pac- man", self.title_font2, 180, (255, 255, 0)
         )
-        self.draw_centred_text(screen, "press to start", self.option_font, 500, (180, 21, 0))
+        self.draw_centred_text(screen, "press to start", self.option_font, 500, color)
 
 
         # options = ["START GAME", "EXIT"]
