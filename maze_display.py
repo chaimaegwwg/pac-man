@@ -69,7 +69,7 @@ class Player:
             if cell & 1:
                 return False
         return True
-    def ft_find_paths_bfs(self,position_pacman,pos_ghost,num):
+    def ft_find_paths_bfs(self,position_pacman,pos_ghost):
         paths = []
         directions = self.directions
         prev = [0, 0]
@@ -129,8 +129,8 @@ class Ghost:
         self.p = p
 
 
-    def ft_position_ghost(self,position_pacman,position_ghost,n):
-        paths = self.func.ft_find_paths_bfs(position_pacman,position_ghost,n)
+    def ft_position_ghost(self,position_pacman,position_ghost):
+        paths = self.func.ft_find_paths_bfs(position_pacman,position_ghost)
         print("the paths is heeeeeeeeeere",paths)
         return position_ghost,paths
 
@@ -151,7 +151,7 @@ class Ghost:
 
         return p
     
-    def move_ghost(self, ghost_x,ghost_y, paths):
+    def move_ghost(self, ghost_x,ghost_y, paths,new):
 
         if not paths:
             print("there is no path to go on it")
@@ -160,15 +160,20 @@ class Ghost:
         if len(paths) < self.len_path:
             print("the len it change it like it len of the path is < len_path")
             self.len_path = 0
-        if self.p <= len(paths):
+        if self.p < len(paths):
             self.p+= 1
-            
+        if self.p >= len(paths):
+            print("it gooooo here")
+            self.p = 0
+        if new is True:
+            self.p = 0
         
         # if len(paths[self.len_path]) <= self.p+1:
         #     print("it stop here for the second time ", self.len_path,self.p+1)
             # return ghost_x, ghost_y, [0, 0]
 
 
+        print("===> first len", len(paths),self.p)
         next_node = paths[self.p]
         target_row, target_col = next_node[0], next_node[1]
         
@@ -180,10 +185,11 @@ class Ghost:
         return ghost_x, ghost_y, [pos_row, pos_col]
    
   
-    def ft_speed_ghost(self,ghost_x,ghost_y,paths,pos):
+    def ft_speed_ghost(self,ghost_x,ghost_y,paths,pos,new):
         if pos is None:
             print("it didin't found any pos to go on it",pos)
-            ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y,paths)
+            ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y,paths,new)
+            new = False
         if pos[0] != 0:
             # print("it do the second col")
             self.speed_ghost_y += pos[0]*2
@@ -243,6 +249,7 @@ class Display:
         font = pygame.font.Font(None, 40)
         running = True
         pos= None
+        new = False
 
         directions = { 
             pygame.K_RIGHT :[0,1], 
@@ -258,7 +265,7 @@ class Display:
 
         position_ghost = [size[0]-1,size[1]-1]
         paths = []
-        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,position_ghost,0)
+        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,position_ghost)
      
         ghost_x = position_ghost[1]
         ghost_y = position_ghost[0]
@@ -277,6 +284,7 @@ class Display:
                     if event.key == pygame.K_SPACE:
                         show_path = True
             if pending_pos is not None and step_x == 0 and step_y == 0:
+                    print("$$$$=>the debug is position of the ghost",ghost_x,ghost_y)
                     pos = pending_pos
                     pending_pos = None
             
@@ -289,7 +297,8 @@ class Display:
                     if abs(step_x) >= size_cell:
                         step_x = 0
                         position_pacman[1] += pos[1]
-                        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
+                        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
+                        new = True
                         if food:
                             food[row][position_pacman[1]] = 20
                             if [row,position_pacman[1]] in super_pacgums:
@@ -297,14 +306,14 @@ class Display:
                     if abs(step_y) >= size_cell:
                         step_y = 0
                         position_pacman[0] += pos[0]
-                        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
+                        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
+                        new = True
                         if food:
                             food[position_pacman[0]][col] = 20
                             if [position_pacman[0],col] in super_pacgums:
                                 super_pacgums.remove([position_pacman[0],col])
 
-            speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,paths,po_s)
-            # print("this one is how the ghost go on there place ",speed_ghostx,speed_ghosty,ghost_x,ghost_y)
+            speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,paths,po_s,new)
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
 
