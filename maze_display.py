@@ -75,7 +75,7 @@ class Player:
         prev = [0, 0]
         queue = {}
         visited = set() 
-        current = [0,0]
+        current = [pos_ghost[0],pos_ghost[1]]
         visited.add(tuple(current))
         to_visit = deque([current]) 
         while to_visit:
@@ -86,11 +86,12 @@ class Player:
             for i in directions:
                 x, y = i
                 nx, ny = current[0] - x, current[1] - y
+                move = [nx - current[0], ny - current[1]]
                 if nx < 0 or ny < 0 or nx > self.size[0] - 1 or ny > self.size[1] - 1:
                     continue
-                if (nx, ny) in visited or not self.ft_check_walls((nx,ny),current[0],current[1]):
+
+                if (nx, ny) in visited or not self.ft_check_walls(move, current[0], current[1]):
                     continue
-                
                 neighbors.append([nx, ny])
             for n in neighbors:
                 visited.add(tuple(n))
@@ -101,6 +102,7 @@ class Player:
         prevs = (position_pacman[0], position_pacman[1])
         res.append(list(prevs))
         if tuple(prevs) not in queue:
+            print("it go here and it reached here before it contunie",queue)
             return []
         curr = prevs
         while curr in queue:
@@ -108,6 +110,7 @@ class Player:
             res.append(list(curr))
 
         res.reverse()
+        print("i thing should be here ",res)
         return res
 
 
@@ -128,9 +131,8 @@ class Ghost:
 
     def ft_position_ghost(self,position_pacman,position_ghost,n):
         paths = self.func.ft_find_paths_bfs(position_pacman,position_ghost,n)
+        print("the paths is heeeeeeeeeere",paths)
         return position_ghost,paths
-
-        return paths
 
     def ft_render_paths_debug(self,paths, show_path, p):
         n = [(255, 255, 255), (255, 0, 0), (0, 255, 0),
@@ -149,43 +151,57 @@ class Ghost:
 
         return p
     
-    def move_ghost(self, ghost_x,ghost_y,paths):
+    def move_ghost(self, ghost_x,ghost_y, paths):
+
         if not paths:
+            print("there is no path to go on it")
             return ghost_x, ghost_y, [0, 0]
 
         if len(paths) < self.len_path:
+            print("the len it change it like it len of the path is < len_path")
             self.len_path = 0
+        if self.p <= len(paths):
+            self.p+= 1
+            
         
-        if len(paths[self.len_path]) <= self.p+1:
-            return ghost_x, ghost_y, [0, 0]
-        next_node = paths[self.len_path][self.p+1]
+        # if len(paths[self.len_path]) <= self.p+1:
+        #     print("it stop here for the second time ", self.len_path,self.p+1)
+            # return ghost_x, ghost_y, [0, 0]
+
+
+        next_node = paths[self.p]
         target_row, target_col = next_node[0], next_node[1]
+        
 
         pos_row = target_row - ghost_y 
         pos_col = target_col - ghost_x
+        print("what happen ",pos_col,pos_row,self.p,target_col,target_row,ghost_y,ghost_x)
 
         return ghost_x, ghost_y, [pos_row, pos_col]
    
   
     def ft_speed_ghost(self,ghost_x,ghost_y,paths,pos):
         if pos is None:
+            print("it didin't found any pos to go on it",pos)
             ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y,paths)
-            print("pos where he will move = ",pos)
-        if pos[1] != 0:
-            self.speed_ghost_x += pos[1]*2
         if pos[0] != 0:
+            # print("it do the second col")
             self.speed_ghost_y += pos[0]*2
+
+        if pos[1] != 0:
+            # print("it do the first row")
+            self.speed_ghost_x += pos[1]*2
         
         if abs(self.speed_ghost_x) >= self.size_cell:
             ghost_x += pos[1]
             self.speed_ghost_x = 0
-            self.p += 1
+            # self.p += 1
             pos = None
 
         elif abs(self.speed_ghost_y) >= self.size_cell:
             ghost_y += pos[0]
             self.speed_ghost_y = 0
-            self.p += 1
+            # self.p += 1
             pos = None
            
         return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos
@@ -273,24 +289,22 @@ class Display:
                     if abs(step_x) >= size_cell:
                         step_x = 0
                         position_pacman[1] += pos[1]
-                        print("this the new path ==>",paths)
                         position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
                         if food:
                             food[row][position_pacman[1]] = 20
                             if [row,position_pacman[1]] in super_pacgums:
                                 super_pacgums.remove([row,position_pacman[1]])
-                    
                     if abs(step_y) >= size_cell:
                         step_y = 0
                         position_pacman[0] += pos[0]
                         position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y],0)
-                        print("this the new path ==>",paths)
                         if food:
                             food[position_pacman[0]][col] = 20
                             if [position_pacman[0],col] in super_pacgums:
                                 super_pacgums.remove([position_pacman[0],col])
 
             speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,paths,po_s)
+            # print("this one is how the ghost go on there place ",speed_ghostx,speed_ghosty,ghost_x,ghost_y)
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
 
