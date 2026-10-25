@@ -116,7 +116,7 @@ class Player:
 
 
 class Ghost:
-    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths):
+    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter):
         self.size = size
         self.size_cell = size_cell
         self.screen = screen
@@ -128,6 +128,7 @@ class Ghost:
         self.func = function
         self.p = p
         self.paths = paths
+        self.counter = counter
 
 
     def ft_position_ghost(self,position_pacman,position_ghost):
@@ -153,13 +154,14 @@ class Ghost:
 
         return p
     
-    def move_ghost(self, ghost_x,ghost_y,move):
+    def move_ghost(self, ghost_x,ghost_y):
 
         if not self.paths:
             print("there is no path to go on it")
             return ghost_x, ghost_y, [0, 0]
-        if move is True:
+        if self.counter == 4:
             self.p = 0
+            self.counter = 0 
         if len(self.paths) < self.len_path:
             print("the len it change it like it len of the path is < len_path")
             self.len_path = 0
@@ -179,13 +181,13 @@ class Ghost:
         return ghost_x, ghost_y, [pos_row, pos_col]
    
   
-    def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,move):
+    def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman):
         if pos is None:
-            # if move:
-            move = True
-            position_ghosts,paths = self.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
-            self.paths = paths
-            ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y,move)
+            self.counter += 1
+            if self.counter == 4:
+                position_ghosts,paths = self.ft_position_ghost(position_pacman,[ghost_y,ghost_x])
+                self.paths = paths
+            ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y)
         if pos[0] != 0:
             self.speed_ghost_y += pos[0]*1
 
@@ -202,7 +204,7 @@ class Ghost:
             self.speed_ghost_y = 0
             pos = None
            
-        return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos,move
+        return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos
 
 
 class Display:
@@ -238,8 +240,9 @@ class Display:
         size_cell = min(width//size[1],height//size[0])
         speed_x = 0
         speed_y = 0
+        counter = 0
         render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
-        ghost_func = Ghost(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths)
+        ghost_func = Ghost(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter)
         super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
         font = pygame.font.Font(None, 40)
         running = True
@@ -292,7 +295,7 @@ class Display:
                     if abs(step_x) >= size_cell:
                         step_x = 0
                         position_pacman[1] += pos[1]
-                        move = True
+                        # move = True
                         # position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
                         if food:
                             food[row][position_pacman[1]] = 20
@@ -301,14 +304,14 @@ class Display:
                     if abs(step_y) >= size_cell:
                         step_y = 0
                         position_pacman[0] += pos[0]
-                        move = True
+                        # move = True
                         # position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
                         if food:
                             food[position_pacman[0]][col] = 20
                             if [position_pacman[0],col] in super_pacgums:
                                 super_pacgums.remove([position_pacman[0],col])
 
-            speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s,move = ghost_func.ft_speed_ghost(ghost_x,ghost_y,po_s,position_pacman,move)
+            speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,po_s,position_pacman)
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
 
