@@ -166,11 +166,12 @@ class Ghosts:
         if len(self.paths) < self.len_path:
             print("the len it change it like it len of the path is < len_path")
             self.len_path = 0
-        if self.p < len(self.paths):
-            self.p+= 1
         if self.p >= len(self.paths):
             print("it gooooo here")
             self.p = 0
+        
+        if self.p < len(self.paths):
+            self.p+= 1
 
         next_node = self.paths[self.p]
         target_row, target_col = next_node[0], next_node[1]
@@ -183,10 +184,11 @@ class Ghosts:
    
     def ft_speed_ghost_blinky(self,ghost_x,ghost_y,pos,position_pacman):
         if pos is None:
-            self.counter += 1
-            if self.counter == 4:
-                position_ghosts,paths = self.ft_position_ghost(position_pacman,[ghost_y,ghost_x])
-                self.paths = paths
+            if self.ghost_name == "blinky":
+                self.counter += 1
+                if self.counter == 4:
+                    position_ghosts,paths = self.ft_position_ghost(position_pacman,[ghost_y,ghost_x])
+                    self.paths = paths
             ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y)
         if pos[0] != 0:
             self.speed_ghost_y += pos[0]*1
@@ -209,25 +211,32 @@ class Ghosts:
     def ft_predict_target_pinky(self,ghost_x,ghost_y,pos,position_pacman,direction):
         # print("weeeeeeeeeeeee are here",position_pacman,pac_man_direction)
         # weeeeeeeeeeeee are here [0, 0] None
-        if pos is None:
-            speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
-            return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
-        
+      
+ 
         new_positon = position_pacman.copy()
-        if direction[0] == 1:
-            new_positon[0] += 5
-        elif direction[1] == 1:
-            new_positon[1] += 5
-        elif direction[0]== -1:
-            new_positon[0] -= 5
-        elif direction[1] == -1:
-            new_positon -= 5
-        if new_positon[0] < 0 or new_positon[0] > self.size or new_positon[1] < 0 or new_positon[1] > self.size:
+        if direction is not None:
+            if direction[0] == 1:
+                new_positon[0] += 4
+            elif direction[1] == 1:
+                new_positon[1] += 4
+            elif direction[0]== -1:
+                new_positon[0] -= 4
+            elif direction[1] == -1:
+                new_positon[1] -= 4
+        if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
             new_positon = position_pacman.copy()
-        if not self.func.ft_check_walls(direction, new_positon[0] , new_positon[1]):
-            new_positon = position_pacman.copy()
+
+
+        n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
+        self.paths = paths
+        # for dirc in self.directions:
+        #     if self.func.ft_check_walls(dirc, new_positon[0],new_positon[1]):
+        #         d = dirc
+        #         break
+        # if d is None:
+        #     new_positon = position_pacman.copy()
         
-        speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+        speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
         
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
     
@@ -237,8 +246,9 @@ class Ghosts:
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
         elif self.ghost_name == "pinky":
-            # speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
-            return self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_pinky(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
+            # return self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
 
 
