@@ -52,6 +52,22 @@ make sure this coordination not like player coordination or other ghosts coordin
 
 
 
+-> Pinky that what i work on it done 
+-> now for PINKY, THE PINK GHOST -> he predicted the place will be 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

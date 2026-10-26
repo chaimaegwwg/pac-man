@@ -115,8 +115,8 @@ class Player:
 
 
 
-class Ghost:
-    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter):
+class Ghosts:
+    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name):
         self.size = size
         self.size_cell = size_cell
         self.screen = screen
@@ -129,6 +129,7 @@ class Ghost:
         self.p = p
         self.paths = paths
         self.counter = counter
+        self.ghost_name = ghost_name
 
 
     def ft_position_ghost(self,position_pacman,position_ghost):
@@ -180,8 +181,7 @@ class Ghost:
 
         return ghost_x, ghost_y, [pos_row, pos_col]
    
-  
-    def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman):
+    def ft_speed_ghost_blinky(self,ghost_x,ghost_y,pos,position_pacman):
         if pos is None:
             self.counter += 1
             if self.counter == 4:
@@ -205,6 +205,42 @@ class Ghost:
             pos = None
            
         return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos
+
+    def ft_predict_target_pinky(self,ghost_x,ghost_y,pos,position_pacman,direction):
+        # print("weeeeeeeeeeeee are here",position_pacman,pac_man_direction)
+        # weeeeeeeeeeeee are here [0, 0] None
+        if pos is None:
+            speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+        
+        new_positon = position_pacman.copy()
+        if direction[0] == 1:
+            new_positon[0] += 5
+        elif direction[1] == 1:
+            new_positon[1] += 5
+        elif direction[0]== -1:
+            new_positon[0] -= 5
+        elif direction[1] == -1:
+            new_positon -= 5
+        if new_positon[0] < 0 or new_positon[0] > self.size or new_positon[1] < 0 or new_positon[1] > self.size:
+            new_positon = position_pacman.copy()
+        if not self.func.ft_check_walls(direction, new_positon[0] , new_positon[1]):
+            new_positon = position_pacman.copy()
+        
+        speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+        
+        return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+    
+    
+    def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction):
+        if self.ghost_name == "blinky":
+            speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+        elif self.ghost_name == "pinky":
+            # speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            return self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+
+
 
 
 class Display:
@@ -242,7 +278,8 @@ class Display:
         speed_y = 0
         counter = 0
         render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
-        ghost_func = Ghost(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter)
+        blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"blinky")
+        pinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"pinky")
         super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
         font = pygame.font.Font(None, 40)
         running = True
@@ -259,11 +296,19 @@ class Display:
         step_x = 0
         step_y = 0
         po_s = None
+        ghosts_list = [
+            {"ghost": blinky, "ghost_x": size[1]-1, "ghost_y": size[0]-1, "pos": None, "speed_x": 0, "speed_y": 0},
+            {"ghost": pinky,  "ghost_x": size[1]-2, "ghost_y": size[0]-2, "pos": None, "speed_x": 0, "speed_y": 0} 
+        ]
         
 
         position_ghost = [size[0]-1,size[1]-1]
-        position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,position_ghost)
-        ghost_func.paths = paths
+        position_ghosts,paths = blinky.ft_position_ghost(position_pacman,position_ghost)
+        blinky.paths = paths
+
+        # position_ghost_pinky = [size[0]-2,size[1]-2]
+        position_ghosts_pinky,paths = pinky.ft_position_ghost(position_pacman,[ghosts_list[1]["ghost_x"],ghosts_list[1]["ghost_y"]])
+        pinky.paths = paths
      
         ghost_x = position_ghost[1]
         ghost_y = position_ghost[0]
@@ -295,8 +340,6 @@ class Display:
                     if abs(step_x) >= size_cell:
                         step_x = 0
                         position_pacman[1] += pos[1]
-                        # move = True
-                        # position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
                         if food:
                             food[row][position_pacman[1]] = 20
                             if [row,position_pacman[1]] in super_pacgums:
@@ -304,27 +347,30 @@ class Display:
                     if abs(step_y) >= size_cell:
                         step_y = 0
                         position_pacman[0] += pos[0]
-                        # move = True
-                        # position_ghosts,paths = ghost_func.ft_position_ghost(position_pacman,[ghost_x,ghost_y])
                         if food:
                             food[position_pacman[0]][col] = 20
                             if [position_pacman[0],col] in super_pacgums:
                                 super_pacgums.remove([position_pacman[0],col])
 
-            speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = ghost_func.ft_speed_ghost(ghost_x,ghost_y,po_s,position_pacman)
+            # speed_ghostx,speed_ghosty,ghost_x,ghost_y,po_s = blinky.ft_speed_ghost(ghost_x,ghost_y,po_s,position_pacman)
+
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
 
             screen.fill(background)
             food,super_pacgums = render.display(pos,food,super_pacgums)
-            
-            ghost = font.render("G", True, (255, 255, 255))
-            screen.blit(ghost,((ghost_x*size_cell)+speed_ghostx+10,(ghost_y*size_cell)+speed_ghosty+10))
+
+            for g in ghosts_list:
+                g["speed_x"],g["speed_y"],g["ghost_x"],g["ghost_y"],g["pos"] = g["ghost"].ft_speed_ghost(g["ghost_x"],g["ghost_y"],g["pos"],position_pacman,pos)
+
+                ghost = font.render("G", True, (255, 255, 255))
+                screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+
+                p = g["ghost"].ft_render_paths_debug(g["ghost"].paths,show_path,p)
             
             pacman = font.render("@", True, (255, 255, 0))
             screen.blit(pacman, (x+10, y+10))
             
-            p = ghost_func.ft_render_paths_debug(paths,show_path,p)
             pygame.time.get_ticks()
 
             show_path = False
