@@ -166,11 +166,11 @@ class Ghosts:
         if len(self.paths) < self.len_path:
             print("the len it change it like it len of the path is < len_path")
             self.len_path = 0
-        if self.p >= len(self.paths):
+        if self.p >= len(self.paths)-1:
             print("it gooooo here")
             self.p = 0
         
-        if self.p < len(self.paths):
+        if self.p < len(self.paths)-1:
             self.p+= 1
 
         next_node = self.paths[self.p]
@@ -209,10 +209,6 @@ class Ghosts:
         return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos
 
     def ft_predict_target_pinky(self,ghost_x,ghost_y,pos,position_pacman,direction):
-        # print("weeeeeeeeeeeee are here",position_pacman,pac_man_direction)
-        # weeeeeeeeeeeee are here [0, 0] None
-      
- 
         new_positon = position_pacman.copy()
         if direction is not None:
             if direction[0] == 1:
@@ -226,15 +222,14 @@ class Ghosts:
         if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
             new_positon = position_pacman.copy()
 
-
-        n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
-        self.paths = paths
-        # for dirc in self.directions:
-        #     if self.func.ft_check_walls(dirc, new_positon[0],new_positon[1]):
-        #         d = dirc
-        #         break
-        # if d is None:
-        #     new_positon = position_pacman.copy()
+        
+        if pos is None:
+            self.counter += 1
+            if self.counter == 4:
+                n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
+                if not paths: 
+                    n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
+                self.paths = paths
         
         speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
         
