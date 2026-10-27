@@ -169,8 +169,7 @@ class Ghosts:
         if self.p >= len(self.paths)-1:
             print("it gooooo here")
             self.p = 0
-        
-        if self.p < len(self.paths)-1:
+        elif self.p < len(self.paths)-1:
             self.p+= 1
 
         next_node = self.paths[self.p]
@@ -234,7 +233,32 @@ class Ghosts:
         speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
         
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
-    
+    def ft_predict_target_inky(self,ghost_x,ghost_y,pos,position_pacman,direction):
+        new_positon = position_pacman.copy()
+        if direction is not None:
+            if direction[0] == 1:
+                new_positon[0] += 2
+            elif direction[1] == 1:
+                new_positon[1] += 2
+            elif direction[0]== -1:
+                new_positon[0] -= 2
+            elif direction[1] == -1:
+                new_positon[1] -= 2
+        if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
+            new_positon = position_pacman.copy()
+
+        
+        if pos is None:
+            self.counter += 1
+            if self.counter == 4:
+                n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
+                if not paths: 
+                    n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
+                self.paths = paths
+        
+        speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
+        
+        return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
     
     def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction):
         if self.ghost_name == "blinky":
@@ -242,6 +266,10 @@ class Ghosts:
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
         elif self.ghost_name == "pinky":
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_pinky(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
+            # return self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+        elif self.ghost_name == "inky":
+            speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_inky(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
             # return self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
@@ -285,6 +313,7 @@ class Display:
         render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
         blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"blinky")
         pinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"pinky")
+        inky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"inky")
         super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
         font = pygame.font.Font(None, 40)
         running = True
@@ -303,7 +332,8 @@ class Display:
         po_s = None
         ghosts_list = [
             {"ghost": blinky, "ghost_x": size[1]-1, "ghost_y": size[0]-1, "pos": None, "speed_x": 0, "speed_y": 0},
-            {"ghost": pinky,  "ghost_x": size[1]-2, "ghost_y": size[0]-2, "pos": None, "speed_x": 0, "speed_y": 0} 
+            {"ghost": pinky,  "ghost_x": size[1]-2, "ghost_y": size[0]-2, "pos": None, "speed_x": 0, "speed_y": 0},
+            {"ghost": inky,  "ghost_x": size[1]-3, "ghost_y": size[0]-3, "pos": None, "speed_x": 0, "speed_y": 0} 
         ]
         
 
@@ -313,6 +343,9 @@ class Display:
 
         # position_ghost_pinky = [size[0]-2,size[1]-2]
         position_ghosts_pinky,paths = pinky.ft_position_ghost(position_pacman,[ghosts_list[1]["ghost_x"],ghosts_list[1]["ghost_y"]])
+        pinky.paths = paths
+
+        position_ghosts_pinky,paths = inky.ft_position_ghost(position_pacman,[ghosts_list[1]["ghost_x"],ghosts_list[1]["ghost_y"]])
         pinky.paths = paths
      
         ghost_x = position_ghost[1]
