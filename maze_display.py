@@ -116,7 +116,7 @@ class Player:
 
 
 class Ghosts:
-    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name):
+    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name,blinky_data=None):
         self.size = size
         self.size_cell = size_cell
         self.screen = screen
@@ -130,6 +130,7 @@ class Ghosts:
         self.paths = paths
         self.counter = counter
         self.ghost_name = ghost_name
+        self.blinky_data = blinky_data
 
 
     def ft_position_ghost(self,position_pacman,position_ghost):
@@ -161,6 +162,11 @@ class Ghosts:
             print("there is no path to go on it")
             return ghost_x, ghost_y, [0, 0]
         if self.counter == 4:
+            # if len(self.paths) > 1:
+            #         self.p = 1
+            # else:
+            #     self.p = 0
+            # self.counter = 0
             self.p = 0
             self.counter = 0 
         if len(self.paths) < self.len_path:
@@ -233,6 +239,8 @@ class Ghosts:
         speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
         
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+
+
     def ft_predict_target_inky(self,ghost_x,ghost_y,pos,position_pacman,direction):
         new_positon = position_pacman.copy()
         if direction is not None:
@@ -244,9 +252,18 @@ class Ghosts:
                 new_positon[0] -= 2
             elif direction[1] == -1:
                 new_positon[1] -= 2
+        new_positon = [new_positon[0] - self.blinky_data["ghost_x"], new_positon[1] - self.blinky_data["ghost_y"]]
         if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
             new_positon = position_pacman.copy()
-
+            if direction is not None:
+                if direction[0] == 1:
+                    new_positon[0] += 2
+                elif direction[1] == 1:
+                    new_positon[1] += 2
+                elif direction[0]== -1:
+                    new_positon[0] -= 2
+                elif direction[1] == -1:
+                    new_positon[1] -= 2
         
         if pos is None:
             self.counter += 1
@@ -260,6 +277,30 @@ class Ghosts:
         
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
     
+    
+    def ft_predict_target_clyde(self,ghost_x,ghost_y,pos,position_pacman,direction):
+        new_positon = position_pacman.copy()
+        if pos is None:
+            self.counter += 1
+            if self.counter == 4:
+                n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
+                if not paths: 
+                    n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
+                    
+                if len(paths) >= 8:
+                    self.paths = paths
+                else:
+                    n ,paths = self.ft_position_ghost([self.size[0]-1,0],[ghost_y,ghost_x])
+                    self.paths = paths
+                # if not paths: 
+                #     n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
+
+        speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
+        return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+
+
+        
+    
     def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction):
         if self.ghost_name == "blinky":
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
@@ -270,7 +311,9 @@ class Ghosts:
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
         elif self.ghost_name == "inky":
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_inky(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
-            # return self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
+            return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
+        elif self.ghost_name == "clyde":
+            speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_clyde(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
 
@@ -311,9 +354,11 @@ class Display:
         speed_y = 0
         counter = 0
         render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
-        blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"blinky")
-        pinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"pinky")
-        inky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"inky")
+        blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"blinky",None)
+        pinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"pinky",None)
+        inky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"inky",None)
+        clyde = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"clyde",None)
+
         super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
         font = pygame.font.Font(None, 40)
         running = True
@@ -330,10 +375,12 @@ class Display:
         step_x = 0
         step_y = 0
         po_s = None
+        # => change the coordonation of the ghost later or atleast check there coordination before give theme
         ghosts_list = [
             {"ghost": blinky, "ghost_x": size[1]-1, "ghost_y": size[0]-1, "pos": None, "speed_x": 0, "speed_y": 0},
             {"ghost": pinky,  "ghost_x": size[1]-2, "ghost_y": size[0]-2, "pos": None, "speed_x": 0, "speed_y": 0},
-            {"ghost": inky,  "ghost_x": size[1]-3, "ghost_y": size[0]-3, "pos": None, "speed_x": 0, "speed_y": 0} 
+            {"ghost": inky,  "ghost_x": size[1]-3, "ghost_y": size[0]-3, "pos": None, "speed_x": 0, "speed_y": 0},
+            {"ghost": clyde,  "ghost_x": size[1]-4, "ghost_y": size[0]-4, "pos": None, "speed_x": 0, "speed_y": 0} 
         ]
         
 
@@ -341,15 +388,19 @@ class Display:
         position_ghosts,paths = blinky.ft_position_ghost(position_pacman,position_ghost)
         blinky.paths = paths
 
-        # position_ghost_pinky = [size[0]-2,size[1]-2]
+      
         position_ghosts_pinky,paths = pinky.ft_position_ghost(position_pacman,[ghosts_list[1]["ghost_x"],ghosts_list[1]["ghost_y"]])
         pinky.paths = paths
 
-        position_ghosts_pinky,paths = inky.ft_position_ghost(position_pacman,[ghosts_list[1]["ghost_x"],ghosts_list[1]["ghost_y"]])
-        pinky.paths = paths
+        position_ghosts_inky,paths = inky.ft_position_ghost(position_pacman,[ghosts_list[2]["ghost_x"],ghosts_list[2]["ghost_y"]])
+        inky.paths = paths
+
+        position_ghosts_inky,paths = clyde.ft_position_ghost(position_pacman,[ghosts_list[3]["ghost_x"],ghosts_list[3]["ghost_y"]])
+        clyde.paths = paths
      
         ghost_x = position_ghost[1]
         ghost_y = position_ghost[0]
+        inky.blinky_data = ghosts_list[0]
         x = 0
         y = 0
         food = None

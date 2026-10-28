@@ -56,6 +56,9 @@ make sure this coordination not like player coordination or other ghosts coordin
 -> now for PINKY, THE PINK GHOST -> he predicted the place will be 
 
 
+=>>> problems:
+->is a ghost up on a another ghost
+
 
 
 
