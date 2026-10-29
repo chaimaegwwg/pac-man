@@ -39,25 +39,39 @@ and the logic
 -> make 4 Ghost each have here own path
 make sure this coordination not like player coordination or other ghosts coordination or a wall that close all
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 -> Pinky that what i work on it done 
 -> now for PINKY, THE PINK GHOST -> he predicted the place will be 
+---------done-----
+
+=> 29/ eat the pac-gum and have 3 abillity:
+- if ghost touch pac-man he will lose
+- the first if he will be eat it like he can eat the ghost and the ghost disapear for 4 second and dislay it in previous place
+- the ghost go conter the path when the pac-man eat the pac-gum
+- the speed change of the ghost
 
 
-=>>> problems:
-->is a ghost up on a another ghost
+
+=> sheet mode 
+=> levels and point
+
+
+update point 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
