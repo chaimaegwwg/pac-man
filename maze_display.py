@@ -115,7 +115,7 @@ class Player:
 
 
 class Ghosts:
-    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name,blinky_data=None,Flag_ability=True):
+    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name,blinky_data=None,Flag_ability=True,counter_path=0):
         self.size = size
         self.size_cell = size_cell
         self.screen = screen
@@ -131,6 +131,7 @@ class Ghosts:
         self.ghost_name = ghost_name
         self.blinky_data = blinky_data
         self.Flag_ability = Flag_ability
+        self.counter_path = counter_path
 
 
     def ft_position_ghost(self,position_pacman,position_ghost):
@@ -247,7 +248,7 @@ class Ghosts:
                 new_positon[0] -= 2
             elif direction[1] == -1:
                 new_positon[1] -= 2
-        new_positon = [new_positon[0] - self.blinky_data["ghost_x"], new_positon[1] - self.blinky_data["ghost_y"]]
+        new_positon = [new_positon[0] - self.blinky_data["ghost_y"], new_positon[1] - self.blinky_data["ghost_x"]]
         if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
             new_positon = position_pacman.copy()
             if direction is not None:
@@ -293,22 +294,11 @@ class Ghosts:
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
     def lose_ability_of_ghosts(self,ghost_x,ghost_y,pos,position_pacman,direction):
+        if self.counter_path >= 5:
+            self.counter_path = 0
+            return
         
         directions = [[0,0],[0,self.size[1]-1],[self.size[0]-1,0],[self.size[0]-1,self.size[1]-1]]
-        # less = float('-inf')
-        # path = []
-        # for direction in directions:
-        #     nx , ny = direction
-        #     px, py = position_pacman
-        #     # if px + nx > self.size[0]-1 or px+ nx < 0 or py + ny > self.size[1]-1 or py+ ny < 0:
-        #     #     continue 
-        #     n ,paths = self.ft_position_ghost(direction,position_pacman)
-        #     if len(paths) > less:
-        #         less = len(paths)
-        #         d = direction
-        # n ,paths = self.ft_position_ghost(direction,[ghost_y, ghost_x])
-
-        
         if self.ghost_name == "blinky":
             target = [0,self.size[1]-1]
             distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
@@ -319,7 +309,7 @@ class Ghosts:
             target = [0,0]
             distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
             if distance < 5:
-                target = [self.size[0]-1,self.size-1]
+                target = [self.size[0]-1,self.size[1]-1]
         elif self.ghost_name == "inky":
             target = [self.size[0] - 1, self.size[1] - 1]
             distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
@@ -329,9 +319,11 @@ class Ghosts:
             target = [self.size[0] - 1, 0]
             distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
             if distance < 5:
-                target = [0,self.size-1]
+                target = [0,self.size[1]-1]
         n ,paths = self.ft_position_ghost(target,[ghost_y, ghost_x])
         self.paths = paths
+        self.p = 0
+        self.counter_path +=1
         
             
 
@@ -340,10 +332,10 @@ class Ghosts:
     
     def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction):
         if not self.Flag_ability:
-            checker = True
-            if checker:
-                self.lose_ability_of_ghosts(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
-            checker = False
+            # checker = True
+            # if checker:
+            self.lose_ability_of_ghosts(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
+            # checker = False
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
         if self.ghost_name == "blinky":

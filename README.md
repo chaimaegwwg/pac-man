@@ -1,5 +1,6 @@
 #this is the readme for me <cramadan>
 
+<!-- =>check the ctr+c -->
 
 --> 2thing 3 lives and the scooring part
 
