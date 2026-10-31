@@ -294,10 +294,9 @@ class Ghosts:
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
     def lose_ability_of_ghosts(self,ghost_x,ghost_y,pos,position_pacman,direction):
-        if self.counter_path >= 5:
+        if self.counter_path == 5:
             self.counter_path = 0
             return
-        
         directions = [[0,0],[0,self.size[1]-1],[self.size[0]-1,0],[self.size[0]-1,self.size[1]-1]]
         if self.ghost_name == "blinky":
             target = [0,self.size[1]-1]
@@ -320,9 +319,10 @@ class Ghosts:
             distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
             if distance < 5:
                 target = [0,self.size[1]-1]
-        n ,paths = self.ft_position_ghost(target,[ghost_y, ghost_x])
-        self.paths = paths
-        self.p = 0
+        if self.counter_path == 0:
+            self.p = 0
+            n ,paths = self.ft_position_ghost(target,[ghost_y, ghost_x])
+            self.paths = paths
         self.counter_path +=1
         
             
@@ -350,35 +350,14 @@ class Ghosts:
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
         elif self.ghost_name == "pinky":
-            # print("Flag_ability",self.Flag_ability)
-            # if not self.Flag_ability:
-            #     print("it gooo here 2")
-            #     paths = self.lose_ability_of_ghosts(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
-            #     self.paths = paths
-            #     speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
-            #     return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_pinky(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
         elif self.ghost_name == "inky":
-            # print("Flag_ability",self.Flag_ability)
-            # if not self.Flag_ability:
-            #     print("it gooo here 3")
-            #     paths = self.lose_ability_of_ghosts(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
-            #     self.paths = paths
-            #     speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
-            #     return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_inky(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
         elif self.ghost_name == "clyde":
-            # print("Flag_ability",self.Flag_ability)
-            # if not self.Flag_ability:
-                # print("it gooo here 4")
-                # paths = self.lose_ability_of_ghosts(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
-                # self.paths = paths
-                # speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
-                # return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_predict_target_clyde(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
@@ -445,10 +424,10 @@ class Display:
         po_s = None
         # => change the coordonation of the ghost later or atleast check there coordination before give theme
         ghosts_list = [
-            {"ghost": blinky, "ghost_x": 0, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0},
-            {"ghost": pinky,  "ghost_x": 0, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0},
-            {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0},
-            {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0} 
+            {"ghost": blinky, "ghost_x": 0, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"B"},
+            {"ghost": pinky,  "ghost_x": 0, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"P"},
+            {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"I"},
+            {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"C"} 
         ]
         
 
@@ -510,7 +489,7 @@ class Display:
             for g in ghosts_list:
 
                 g["speed_x"],g["speed_y"],g["ghost_x"],g["ghost_y"],g["pos"] = g["ghost"].ft_speed_ghost(g["ghost_x"],g["ghost_y"],g["pos"],position_pacman,pos)
-                ghost = font.render("G", True, (255, 255, 255))
+                ghost = font.render(g["draw"], True, (255, 255, 255))
                 screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
                 if [g["ghost_y"],g["ghost_x"]] == position_pacman and g["ghost"].Flag_ability:
                     sys.exit()
