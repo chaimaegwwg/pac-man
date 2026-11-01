@@ -60,6 +60,13 @@ update point
 
 
 
+=> fix the the ghosts movement and make it 
+do time to reactive flag again
+if pac-man touch ghosts the ghosts must be disapear and return after 2 min 
+
+
+
+
 
 
 

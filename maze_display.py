@@ -154,7 +154,47 @@ class Ghosts:
             p += 1
 
         return p
+   
+
+
     
+
+
+    # def move_ghost(self, ghost_x, ghost_y):
+    #     if not self.paths:
+    #         return ghost_x, ghost_y, [0, 0]
+            
+    #     if self.counter == 4:
+    #         self.p = 0
+    #         self.counter = 0 
+            
+    #     if len(self.paths) < self.len_path:
+    #         self.len_path = 0
+            
+    #     # FIX 1: Only move forward on the path. Do NOT reset to 0 if the path is short.
+    #     # This stops the ghosts from turning around and walking backwards.
+    #     if self.p < len(self.paths) - 1:
+    #         self.p += 1
+            
+    #     next_node = self.paths[self.p]
+    #     target_row, target_col = next_node[0], next_node[1]
+        
+    #     pos_row = target_row - ghost_y 
+    #     pos_col = target_col - ghost_x
+
+    #     # FIX 2: Clamp movement to a maximum of 1 or -1. 
+    #     # This completely stops the "teleporting" or clipping through walls when math gets weird.
+    #     if pos_row > 1: 
+    #         pos_row = 1
+    #     if pos_row < -1:
+    #         pos_row = -1
+    #     if pos_col > 1:
+    #         pos_col = 1
+    #     if pos_col < -1:
+    #         pos_col = -1
+
+    #     return ghost_x, ghost_y, [pos_row, pos_col]
+
     def move_ghost(self, ghost_x,ghost_y):
 
         if not self.paths:
@@ -166,12 +206,11 @@ class Ghosts:
         if len(self.paths) < self.len_path:
             print("the len it change it like it len of the path is < len_path")
             self.len_path = 0
-        if self.p >= len(self.paths)-1:
-            self.p = 0
-        elif self.p < len(self.paths)-1:
-            self.p+= 1
-        print("to check how much it give to p = ", self.p,self.paths)
-        print(type(self.paths))
+        # if self.p >= len(self.paths)-1:
+        #     self.p = 0
+        if self.p < len(self.paths)-1:
+            self.p += 1
+      
         print("this also",self.paths[self.p][0],self.paths[self.p][1])
         next_node = self.paths[self.p]
         target_row, target_col = next_node[0], next_node[1]
@@ -179,13 +218,55 @@ class Ghosts:
 
         pos_row = target_row - ghost_y 
         pos_col = target_col - ghost_x
+        if pos_row > 1: 
+            pos_row = 1
+        if pos_row < -1:
+            pos_row = -1
+        if pos_col > 1:
+            pos_col = 1
+        if pos_col < -1:
+            pos_col = -1
         print("it stop hereeeeeeeee")
 
         return ghost_x, ghost_y, [pos_row, pos_col]
-   
     def ft_speed_ghost_blinky(self,ghost_x,ghost_y,pos,position_pacman):
         if pos is None:
-            if self.ghost_name == "blinky":
+            #here we check also the flag ?
+            if self.ghost_name == "blinky" and self.Flag_ability:
+                self.counter += 1
+                if self.counter == 4:
+                    position_ghosts,paths = self.ft_position_ghost(position_pacman,[ghost_y,ghost_x])
+                    self.paths = paths
+            ghost_x,ghost_y,pos = self.move_ghost(ghost_x,ghost_y)
+            
+            # FIX: If ghost has reached the end of a short path before the counter hits 4,
+            # pos becomes [0,0]. We force it to None so the counter keeps ticking!
+            if pos == [0, 0]:
+                pos = None
+
+        # FIX: We only calculate speed if pos is not None (in case we just reset it above)
+        if pos is not None:
+            if pos[0] != 0:
+                self.speed_ghost_y += pos[0]*1
+
+            if pos[1] != 0:
+                self.speed_ghost_x += pos[1]*1
+            
+            if abs(self.speed_ghost_x) >= self.size_cell:
+                ghost_x += pos[1]
+                self.speed_ghost_x = 0
+                pos = None
+
+            elif abs(self.speed_ghost_y) >= self.size_cell:
+                ghost_y += pos[0]
+                self.speed_ghost_y = 0
+                pos = None
+           
+        return self.speed_ghost_x,self.speed_ghost_y ,ghost_x, ghost_y,pos
+    def ft_speed_ghost_blinky(self,ghost_x,ghost_y,pos,position_pacman):
+        if pos is None:
+            #here we check also the flag ?
+            if self.ghost_name == "blinky" and self.Flag_ability:
                 self.counter += 1
                 if self.counter == 4:
                     position_ghosts,paths = self.ft_position_ghost(position_pacman,[ghost_y,ghost_x])
@@ -236,6 +317,46 @@ class Ghosts:
         
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
+    # def ft_predict_target_inky(self,ghost_x,ghost_y,pos,position_pacman,direction):
+    #     new_positon = position_pacman.copy()
+    #     if direction is not None:
+    #         if direction[0] == 1:
+    #             new_positon[0] += 2
+    #         elif direction[1] == 1:
+    #             new_positon[1] += 2
+    #         elif direction[0]== -1:
+    #             new_positon[0] -= 2
+    #         elif direction[1] == -1:
+    #             new_positon[1] -= 2
+                
+    #     # FIX 3: Correct Inky target math. Find the distance from Blinky to (Pacman + 2), and double it.
+    #     vector_y = new_positon[0] - self.blinky_data["ghost_y"]
+    #     vector_x = new_positon[1] - self.blinky_data["ghost_x"]
+    #     new_positon = [self.blinky_data["ghost_y"] + (vector_y * 2), self.blinky_data["ghost_x"] + (vector_x * 2)]
+        
+    #     if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
+    #         new_positon = position_pacman.copy()
+    #         if direction is not None:
+    #             if direction[0] == 1:
+    #                 new_positon[0] += 2
+    #             elif direction[1] == 1:
+    #                 new_positon[1] += 2
+    #             elif direction[0]== -1:
+    #                 new_positon[0] -= 2
+    #             elif direction[1] == -1:
+    #                 new_positon[1] -= 2
+        
+    #     if pos is None:
+    #         self.counter += 1
+    #         if self.counter == 4:
+    #             n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
+    #             if not paths: 
+    #                 n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
+    #             self.paths = paths
+        
+    #     speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
+        
+    #     return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
     def ft_predict_target_inky(self,ghost_x,ghost_y,pos,position_pacman,direction):
         new_positon = position_pacman.copy()
@@ -248,7 +369,12 @@ class Ghosts:
                 new_positon[0] -= 2
             elif direction[1] == -1:
                 new_positon[1] -= 2
-        new_positon = [new_positon[0] - self.blinky_data["ghost_y"], new_positon[1] - self.blinky_data["ghost_x"]]
+        vector_y = new_positon[0] - self.blinky_data["ghost_y"]
+        vector_x = new_positon[1] - self.blinky_data["ghost_x"]
+        new_positon = [self.blinky_data["ghost_y"] + (vector_y * 2), self.blinky_data["ghost_x"] + (vector_x * 2)]
+
+        # new_positon = [new_positon[0] - self.blinky_data["ghost_y"], new_positon[1] - self.blinky_data["ghost_x"]]
+        
         if new_positon[0] < 0 or new_positon[0] > self.size[0]-1 or new_positon[1] < 0 or new_positon[1] > self.size[1]-1:
             new_positon = position_pacman.copy()
             if direction is not None:
@@ -285,6 +411,7 @@ class Ghosts:
                     
                 if len(paths) >= 8:
                     self.paths = paths
+                
                 else:
                     n ,paths = self.ft_position_ghost([self.size[0]-1,0],[ghost_y,ghost_x])
                     self.paths = paths
@@ -294,42 +421,41 @@ class Ghosts:
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
     def lose_ability_of_ghosts(self,ghost_x,ghost_y,pos,position_pacman,direction):
-        if self.counter_path == 5:
-            self.counter_path = 0
-            return
-        directions = [[0,0],[0,self.size[1]-1],[self.size[0]-1,0],[self.size[0]-1,self.size[1]-1]]
-        if self.ghost_name == "blinky":
-            target = [0,self.size[1]-1]
-            distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
-            #i should to change it later for the maze if it small 
-            if distance < 5:
-                target = [self.size[0]-1,0]
-        elif self.ghost_name == "pinky":
-            target = [0,0]
-            distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
-            if distance < 5:
-                target = [self.size[0]-1,self.size[1]-1]
-        elif self.ghost_name == "inky":
-            target = [self.size[0] - 1, self.size[1] - 1]
-            distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
-            if distance < 5:
-                target = [0,0]
-        elif self.ghost_name == "clyde":
-            target = [self.size[0] - 1, 0]
-            distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
-            if distance < 5:
-                target = [0,self.size[1]-1]
-        if self.counter_path == 0:
-            self.p = 0
-            n ,paths = self.ft_position_ghost(target,[ghost_y, ghost_x])
-            self.paths = paths
-        self.counter_path +=1
-        
-            
+       
+        if pos is None:
+            if self.counter_path == 0:
+                if self.ghost_name == "blinky":
+                    target = [0,self.size[1]-1]
+                    distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
+                    #i should to change it later for the maze if it small 
+                    if distance < 5:
+                        target = [self.size[0]-1,0]
+                elif self.ghost_name == "pinky":
+                    target = [0,0]
+                    distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
+                    if distance < 5:
+                        target = [self.size[0]-1,self.size[1]-1]
+                elif self.ghost_name == "inky":
+                    target = [self.size[0] - 1, self.size[1] - 1]
+                    distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
+                    if distance < 5:
+                        target = [0,0]
+                elif self.ghost_name == "clyde":
+                    target = [self.size[0] - 1, 0]
+                    distance = abs(position_pacman[0] - target[0]) + abs(position_pacman[1] - target[1])
+                    if distance < 5:
+                        target = [0,self.size[1]-1]
+                # if self.counter_path == 0:
+                self.p = 0
+                n ,paths = self.ft_position_ghost(target,[ghost_y, ghost_x])
+                if not paths:
+                    n, paths = self.ft_position_ghost([0,0],[ghost_y, ghost_x])
+                self.paths = paths
 
-
+            self.counter_path +=1
+            if self.counter_path >=  4:
+                self.counter_path = 0
         
-    
     def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction):
         if not self.Flag_ability:
             # checker = True
