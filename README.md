@@ -63,6 +63,26 @@ update point
 => fix the the ghosts movement and make it 
 do time to reactive flag again
 if pac-man touch ghosts the ghosts must be disapear and return after 2 min 
+---done----
+
+=>Cheat mode -> it done still the level and when it cheat will update the lives 
+
+
+
+
+
+=> last mission:
+
+i feel the movement of the cost not normal at all
+also i should fix when the pac-man touch the ghost
+
+
+add the picture for each one
+
+do the visual of the score and live of the pac-man
+
+add levels
+
 
 
 

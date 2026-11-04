@@ -115,7 +115,7 @@ class Player:
 
 
 class Ghosts:
-    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name,blinky_data=None,Flag_ability=True,counter_path=0):
+    def __init__(self, size, size_cell,screen,directions,generator,len_path,speed_x,speed_y,function,p,paths,counter,ghost_name,speed,blinky_data=None,Flag_ability=True,counter_path=0,data={}):
         self.size = size
         self.size_cell = size_cell
         self.screen = screen
@@ -130,8 +130,10 @@ class Ghosts:
         self.counter = counter
         self.ghost_name = ghost_name
         self.blinky_data = blinky_data
+        self.data = data
         self.Flag_ability = Flag_ability
         self.counter_path = counter_path
+        self.speed = speed
 
 
     def ft_position_ghost(self,position_pacman,position_ghost):
@@ -205,10 +207,10 @@ class Ghosts:
                 pos = None
         if pos is not None:
             if pos[0] != 0:
-                self.speed_ghost_y += pos[0]*1
+                self.speed_ghost_y += pos[0]* self.data["speed"]
 
             if pos[1] != 0:
-                self.speed_ghost_x += pos[1]*1
+                self.speed_ghost_x += pos[1]* self.data["speed"]
             
             if abs(self.speed_ghost_x) >= self.size_cell:
                 ghost_x += pos[1]
@@ -347,12 +349,15 @@ class Ghosts:
             if self.counter_path >=  4:
                 self.counter_path = 0
         
-    def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction):
+    def ft_speed_ghost(self,ghost_x,ghost_y,pos,position_pacman,pac_man_direction,star_time):
+        if star_time is not None:
+            if time.time() - star_time >= 20: 
+                self.Flag_ability = True
+                star_time = None
+                self.data["speed"] = 1
+     
         if not self.Flag_ability:
-            # checker = True
-            # if checker:
             self.lose_ability_of_ghosts(ghost_x,ghost_y,pos,position_pacman,pac_man_direction)
-            # checker = False
             speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,position_pacman)
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
         if self.ghost_name == "blinky":
@@ -401,7 +406,9 @@ class Display:
                 exit_cell=(-1, -1),
                 seed=0
             )
-        
+        image = pygame.image.load("Gemini_Generated_Image_v7qpsyv7qpsyv7qp-removebg-preview.png")
+        image = pygame.transform.scale(image,(70,50))
+
         directions_wall = [[1,0],[-1,0],[0,-1],[0,1]]
         screen = pygame.display.set_mode((size[1]*50,size[0]*50))
         width, height = screen.get_size()
@@ -410,11 +417,12 @@ class Display:
         speed_y = 0
         counter = 0
         Flag_ability = True
+        data = {"speed": 1}
         render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0)
-        blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"blinky" ,None,Flag_ability)
-        pinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"pinky",None,Flag_ability)
-        inky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"inky",None,Flag_ability)
-        clyde = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"clyde",None,Flag_ability)
+        blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"blinky" , None,Flag_ability,data)
+        pinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"pinky",None,Flag_ability,data)
+        inky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"inky",None,Flag_ability,data)
+        clyde = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,"clyde",None,Flag_ability,data)
 
         super_pacgums = [[0,0],[0,size[1]-1],[size[0]-1,0],[size[0]-1,size[1]-1]]
         font = pygame.font.Font(None, 40)
@@ -428,24 +436,29 @@ class Display:
             pygame.K_UP: [-1,0], 
             pygame.K_DOWN:[1,0] 
         }
-
         step_x = 0
         step_y = 0
         po_s = None
         # => change the coordonation of the ghost later or atleast check there coordination before give theme
         ghosts_list = [
-            {"ghost": blinky, "ghost_x": 0, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"B"},
-            {"ghost": pinky,  "ghost_x": 0, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"P"},
-            {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"I"},
-            {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"C"} 
+            {"ghost": blinky, "ghost_x": 0, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"B","time":None,"speed":1,"cheat": False},
+            {"ghost": pinky,  "ghost_x": 0, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"P","time":None,"speed":1,"cheat": False},
+            {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"I","time":None,"speed":1,"cheat": False},
+            {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"C","time":None,"speed":1,"cheat": False} 
         ]
-        
-
+        speed_pac_man = 3
+        #here to test cheat mode 
+        for g in ghosts_list:
+            g["cheat"] = True
+            g["time"] = time.time()
         for g in ghosts_list:
             position_ghosts,paths = blinky.ft_position_ghost(position_pacman,[g["ghost_y"],g["ghost_x"]])
             g["ghost"].paths = paths
   
         inky.blinky_data = ghosts_list[0]
+    
+        for g in ghosts_list:
+            g["ghost"].data = data
         x = 0
         y = 0
         food = None
@@ -461,17 +474,24 @@ class Display:
                         pending_pos = directions[event.key]
                     if event.key == pygame.K_SPACE:
                         show_path = True
+            # if pending_pos is not None and step_x == 0 and step_y == 0:
+            #         #here i do pos that for reserve my previous value of direction  
+            #         pos = pending_pos
+            #         pending_pos = None
             if pending_pos is not None and step_x == 0 and step_y == 0:
-                    #here i do pos that for reserve my previous value of direction  
+                row = position_pacman[0]
+                col = position_pacman[1]
+                if render.ft_check_walls(pending_pos, row, col):
                     pos = pending_pos
                     pending_pos = None
+            
             
             if pos:
                 row = position_pacman[0]
                 col = position_pacman[1]
                 if render.ft_check_walls(pos,row,col):
-                    step_x += pos[1] * 3
-                    step_y += pos[0] * 3
+                    step_x += pos[1] * speed_pac_man
+                    step_y += pos[0] * speed_pac_man
                     if abs(step_x) >= size_cell:
                         step_x = 0
                         position_pacman[1] += pos[1]
@@ -481,6 +501,8 @@ class Display:
                                 super_pacgums.remove([row,position_pacman[1]])
                                 for g in ghosts_list:
                                     g["ghost"].Flag_ability = False
+                                    g["time"]  = time.time()
+                                    g["speed"] = 0.5
                     if abs(step_y) >= size_cell:
                         step_y = 0
                         position_pacman[0] += pos[0]
@@ -490,6 +512,8 @@ class Display:
                                 super_pacgums.remove([position_pacman[0],col])
                                 for g in ghosts_list:
                                     g["ghost"].Flag_ability = False
+                                    g["time"] = time.time()
+                                    g["speed"] = 0.5
 
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
@@ -499,17 +523,41 @@ class Display:
 
             for g in ghosts_list:
 
-                g["speed_x"],g["speed_y"],g["ghost_x"],g["ghost_y"],g["pos"] = g["ghost"].ft_speed_ghost(g["ghost_x"],g["ghost_y"],g["pos"],position_pacman,pos)
+                g["speed_x"],g["speed_y"],g["ghost_x"],g["ghost_y"],g["pos"] = g["ghost"].ft_speed_ghost(g["ghost_x"],g["ghost_y"],g["pos"],position_pacman,pos,g["time"])
                 ghost = font.render(g["draw"], True, (255, 255, 255))
-                screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
-                if [g["ghost_y"],g["ghost_x"]] == position_pacman and g["ghost"].Flag_ability:
+
+                if g["cheat"]:
+                    screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                    speed_pac_man = 5
+                if [g["ghost_y"],g["ghost_x"]] == position_pacman and not g["ghost"].Flag_ability:
+                    if time.time() - g["time"] >= 20:
+                        screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                    else:
+                        if g["draw"] == "B":
+                            g["ghost_x"], g["ghost_y"] = 0, 0
+                        elif g["draw"] == "P":
+                            g["ghost_x"], g["ghost_y"] = 0, size[1]-1
+                        elif g["draw"] == "I":
+                            g["ghost_x"], g["ghost_y"] = size[0]-1, 0
+                        elif g["draw"] == "C":
+                            g["ghost_x"], g["ghost_y"] = size[0]-1, size[1]-1
+                        g["speed_x"] = 0
+                        g["speed_y"] = 0
+                        g["pos"] = None
+                        g["speed"]= 1
+                        g["ghost"].Flag_ability = True
+                elif [g["ghost_y"],g["ghost_x"]] == position_pacman and g["ghost"].Flag_ability:
                     sys.exit()
-                # elif [g["ghost_y"],g["ghost_x"]] == position_pacman and Ghosts.Flag_ability:
+                else:
+                    screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                   
 
                 p = g["ghost"].ft_render_paths_debug(g["ghost"].paths,show_path,p)
+                    
             
             pacman = font.render("@", True, (255, 255, 0))
-            screen.blit(pacman, (x+10, y+10))
+            # screen.blit(image, (x+10, y+10))
+            screen.blit(image, (x+2, y+2))
             
             pygame.time.get_ticks()
 
