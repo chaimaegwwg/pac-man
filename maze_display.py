@@ -377,6 +377,29 @@ class Ghosts:
             return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
 
+# class IM_pac_man:
+#     def __init__(self):
+#         pass
+#     def image(self,pos):
+#         pac_man_right = pygame.image.load("image/right_pac.png")
+#         pac_man_left = pygame.image.load("image/left_pac.png")
+#         pac_man_up = pygame.image.load("image/up_pac.png")
+#         pac_man_down = pygame.image.load("image/down_pac.png")
+
+#         pac_man_right = pygame.transform.scale(pac_man_right,(65,40))
+#         pac_man_left = pygame.transform.scale(pac_man_left,(65,40))
+#         pac_man_up = pygame.transform.scale(pac_man_up,(65,40))
+#         pac_man_down = pygame.transform.scale(pac_man_down,(65,40))
+#         if pos == [0,1]:
+#             screen.blit(pac_man_right, (x-10, y+2))
+#         elif pos == [0,-1]:
+#             screen.blit(pac_man_left, (x-10, y+2))
+#         elif pos == [1,0]:
+#             screen.blit(pac_man_down,(x-10, y+2))
+#         elif pos == [-1,0]:
+#             screen.blit(pac_man_up,(x-10, y+2))
+#         else:
+#             screen.blit(pac_man_right, (x-10, y+2))
 
 
 class Display:
@@ -398,6 +421,7 @@ class Display:
         position_pacman = [0, size[0]//2]
         
         move = False
+        close = True
         paths = []
         generator = MazeGenerator(
                 size,
@@ -406,8 +430,7 @@ class Display:
                 exit_cell=(-1, -1),
                 seed=0
             )
-        image = pygame.image.load("Gemini_Generated_Image_v7qpsyv7qpsyv7qp-removebg-preview.png")
-        image = pygame.transform.scale(image,(70,50))
+   
 
         directions_wall = [[1,0],[-1,0],[0,-1],[0,1]]
         screen = pygame.display.set_mode((size[1]*50,size[0]*50))
@@ -440,11 +463,45 @@ class Display:
         step_y = 0
         po_s = None
         # => change the coordonation of the ghost later or atleast check there coordination before give theme
+        pac_man_right = pygame.image.load("image/right_pac.png")
+        pac_man_left = pygame.image.load("image/left_pac.png")
+        pac_man_up = pygame.image.load("image/up_pac.png")
+        pac_man_down = pygame.image.load("image/down_pac.png")
+        # pac_close = pygame.image.load("image/close.png")
+
+        pac_man_right = pygame.transform.scale(pac_man_right,(70,45))
+        pac_man_left = pygame.transform.scale(pac_man_left,(70,45))
+        pac_man_up = pygame.transform.scale(pac_man_up,(70,45))
+        pac_man_down = pygame.transform.scale(pac_man_down,(70,45))
+
+        Ghost_red = pygame.image.load("image/ghost_red.png")
+        ghost_red = pygame.transform.scale(Ghost_red,(75,45))
+
+        ghost_pink = pygame.image.load("image/ghost_pink.png")
+        ghost_pink = pygame.transform.scale(ghost_pink,(75,45))
+
+        ghost_blue = pygame.image.load("image/ghost_blue.png")
+        ghost_blue = pygame.transform.scale(ghost_blue,(75,45))
+
+        ghost_yellow = pygame.image.load("image/ghost_yellow.png")
+        ghost_yellow = pygame.transform.scale(ghost_yellow,(75,45))
+
+
+        # pac_man_close = pygame.transform.scale(pac_close,(65,40))
+        
+        
+        # dic_image = {
+        #     (-1,0) :pac_man_up,
+        #     (1,0): pac_man_down,
+        #     (0,1): pac_man_right,
+        #     (0,-1): pac_man_left
+        # }
+        
         ghosts_list = [
-            {"ghost": blinky, "ghost_x": 0, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"B","time":None,"speed":1,"cheat": False},
-            {"ghost": pinky,  "ghost_x": 0, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"P","time":None,"speed":1,"cheat": False},
-            {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"I","time":None,"speed":1,"cheat": False},
-            {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"C","time":None,"speed":1,"cheat": False} 
+            {"ghost": blinky, "ghost_x": 0, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"B","time":None,"speed":1,"cheat": False,"image":ghost_red},
+            {"ghost": pinky,  "ghost_x": 0, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"P","time":None,"speed":1,"cheat": False,"image":ghost_pink},
+            {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"I","time":None,"speed":1,"cheat": False,"image":ghost_blue},
+            {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"C","time":None,"speed":1,"cheat": False,"image":ghost_yellow} 
         ]
         speed_pac_man = 3
         #here to test cheat mode 
@@ -527,11 +584,11 @@ class Display:
                 ghost = font.render(g["draw"], True, (255, 255, 255))
 
                 if g["cheat"]:
-                    screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                    screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
                     speed_pac_man = 5
                 if [g["ghost_y"],g["ghost_x"]] == position_pacman and not g["ghost"].Flag_ability:
                     if time.time() - g["time"] >= 20:
-                        screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                        screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
                     else:
                         if g["draw"] == "B":
                             g["ghost_x"], g["ghost_y"] = 0, 0
@@ -549,7 +606,7 @@ class Display:
                 elif [g["ghost_y"],g["ghost_x"]] == position_pacman and g["ghost"].Flag_ability:
                     sys.exit()
                 else:
-                    screen.blit(ghost,((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                    screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
                    
 
                 p = g["ghost"].ft_render_paths_debug(g["ghost"].paths,show_path,p)
@@ -557,7 +614,18 @@ class Display:
             
             pacman = font.render("@", True, (255, 255, 0))
             # screen.blit(image, (x+10, y+10))
-            screen.blit(image, (x+2, y+2))
+          
+            if pos == [0,1]:
+                screen.blit(pac_man_right, (x-10, y+2))
+            elif pos == [0,-1]:
+                screen.blit(pac_man_left, (x-10, y+2))
+            elif pos == [1,0]:
+                screen.blit(pac_man_down,(x-10, y+2))
+            elif pos == [-1,0]:
+                screen.blit(pac_man_up,(x-10, y+2))
+            else:
+                screen.blit(pac_man_right, (x-10, y+2))
+            # pac_man = dic_image[tuple(pos)]
             
             pygame.time.get_ticks()
 
