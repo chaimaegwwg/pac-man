@@ -505,9 +505,10 @@ class Display:
         ]
         speed_pac_man = 3
         #here to test cheat mode 
-        for g in ghosts_list:
-            g["cheat"] = True
-            g["time"] = time.time()
+       
+        # for g in ghosts_list:
+        #     g["cheat"] = True
+        #     g["time"] = time.time()
         for g in ghosts_list:
             position_ghosts,paths = blinky.ft_position_ghost(position_pacman,[g["ghost_y"],g["ghost_x"]])
             g["ghost"].paths = paths
@@ -574,7 +575,6 @@ class Display:
 
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
-
             screen.fill(background)
             food,super_pacgums = render.display(pos,food,super_pacgums)
 
@@ -583,12 +583,14 @@ class Display:
                 g["speed_x"],g["speed_y"],g["ghost_x"],g["ghost_y"],g["pos"] = g["ghost"].ft_speed_ghost(g["ghost_x"],g["ghost_y"],g["pos"],position_pacman,pos,g["time"])
                 ghost = font.render(g["draw"], True, (255, 255, 255))
 
+                difx_subtraction = abs(((g["ghost_x"]*size_cell)+g["speed_x"]-10) - (x-10))
+                dify_subtraction = abs(((g["ghost_y"]*size_cell)+g["speed_y"]+2) - (y+2))
                 if g["cheat"]:
-                    screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                    screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]-10,(g["ghost_y"]*size_cell)+g["speed_y"]+2))
                     speed_pac_man = 5
-                if [g["ghost_y"],g["ghost_x"]] == position_pacman and not g["ghost"].Flag_ability:
+                if difx_subtraction <= size_cell//2 and dify_subtraction <= size_cell//2  and not g["ghost"].Flag_ability:
                     if time.time() - g["time"] >= 20:
-                        screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                        screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]-10,(g["ghost_y"]*size_cell)+g["speed_y"]+2))
                     else:
                         if g["draw"] == "B":
                             g["ghost_x"], g["ghost_y"] = 0, 0
@@ -603,10 +605,10 @@ class Display:
                         g["pos"] = None
                         g["speed"]= 1
                         g["ghost"].Flag_ability = True
-                elif [g["ghost_y"],g["ghost_x"]] == position_pacman and g["ghost"].Flag_ability:
+                elif difx_subtraction <= size_cell//2 and dify_subtraction <= size_cell//2 and g["ghost"].Flag_ability:
                     sys.exit()
                 else:
-                    screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]+10,(g["ghost_y"]*size_cell)+g["speed_y"]+10))
+                    screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]-10,(g["ghost_y"]*size_cell)+g["speed_y"]+2))
                    
 
                 p = g["ghost"].ft_render_paths_debug(g["ghost"].paths,show_path,p)
