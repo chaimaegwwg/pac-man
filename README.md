@@ -75,11 +75,12 @@ if pac-man touch ghosts the ghosts must be disapear and return after 2 min
 the first mission: --done--
     =>also i should fix when the pac-man touch the ghost
 
-the second mission:
-    =>add the picture for each one => still need to fix it 
 
 fixed mission:
-    =>i feel the movement of the cost not normal at all and like when eated pac-gum when the ghost reached the goal what should happen should i take my same logic or not
+    =>i feel the movement of the ghosts not normal at all and like when eated pac-gum when the ghost reached the goal what should happen should i take my same logic or not
+
+mission picture:
+    =>add the picture for each one => still need to fix it 
 
 last mission:
     =>do the visual of the score and live of the pac-man
