@@ -32,8 +32,12 @@ class Player:
             for col, cell in enumerate(line):
                 x = col * cell_size
                 y = row * cell_size
-                # pacman = font.render(normal_pel, True, (255, 255, 0))
-                # super_pacgum = font.render(self.supper_pel,True, (255,255,0))
+                # glow_color = (0, 80, 140)
+                # core_color = (0, 220, 255)
+                # glow_color, core_color = (100, 0, 150), (255, 0, 127)
+                # glow_color, core_color = (110, 80, 50), (245, 235, 210)
+                # glow_color, core_color = (60, 40, 20), (160, 130, 90)
+                glow_color, core_color = (40, 28, 15), (120, 105, 90)
                 if not (cell &1 and cell & 2 and cell & 4 and cell & 8):
                     if food is None:
                         self.screen.blit(self.normal_bel, (x+10, y+10))
@@ -47,16 +51,21 @@ class Player:
                         self.screen.blit(self.normal_bel, (x+10, y+10))
                 # top
                 if cell & 1:
-                    pygame.draw.line(self.screen, (100, 80, 120),(x, y),(x + cell_size, y), 3)
+                    # pygame.draw.line(self.screen, (100, 80, 120),(x, y),(x + cell_size, y), 3)
+                    pygame.draw.line(self.screen, glow_color, (x, y), (x + cell_size, y), 5)
+                    pygame.draw.line(self.screen, core_color, (x, y), (x + cell_size, y), 3)
                 # right
                 if cell & 2:
-                    pygame.draw.line(self.screen, (100, 80, 120),(x + cell_size, y),(x + cell_size, y + cell_size), 3)
+                    pygame.draw.line(self.screen, glow_color,(x + cell_size, y),(x + cell_size, y + cell_size), 5)
+                    pygame.draw.line(self.screen, core_color,(x + cell_size, y),(x + cell_size, y + cell_size), 3)
                 # bottom
                 if cell & 4:
-                    pygame.draw.line(self.screen, (100, 80, 120),(x, y + cell_size),(x + cell_size, y + cell_size), 3)
+                    pygame.draw.line(self.screen, glow_color,(x, y + cell_size),(x + cell_size, y + cell_size), 5)
+                    pygame.draw.line(self.screen, core_color,(x, y + cell_size),(x + cell_size, y + cell_size), 3)
                 # left
                 if cell & 8:
-                    pygame.draw.line(self.screen, (100, 80, 120),(x, y),(x, y + cell_size), 3)
+                    pygame.draw.line(self.screen, glow_color,(x, y),(x, y + cell_size), 5)
+                    pygame.draw.line(self.screen, core_color,(x, y),(x, y + cell_size), 3)
         return food,super_pacgums
                 
     #from now i will like just test that and i will start from 0,0 after that i will change it to the middle
@@ -429,8 +438,11 @@ class Display:
 
 
 
-        screen = pygame.display.set_mode((size[1]*50,size[0]*50))
+        # screen = pygame.display.set_mode((size[1]*50,size[0]*50))
+        screen = pygame.display.set_mode((size[1]*50,(size[0]*50)+70))
         width, height = screen.get_size()
+        size_screen = [width,height] 
+        height -= 70
         size_cell = min(width//size[1],height//size[0])
         speed_x = 0
         speed_y = 0
@@ -444,6 +456,9 @@ class Display:
 
         supper_pel = pygame.image.load("image/supper_bel.png")
         supper_pel = pygame.transform.scale(supper_pel,(45,25))
+
+        
+        
 
         render = Player(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,0,normal_pel,supper_pel)
         blinky = Ghosts(size, size_cell, screen,directions_wall,generator,0,speed_x,speed_y,render,0,paths,counter,time_live,"blinky" , None,Flag_ability,data)
@@ -467,6 +482,8 @@ class Display:
         step_y = 0
         po_s = None
         score = 0
+        font = pygame.font.SysFont("Arial", 20)
+        score_surface = font.render(f"Score: {score}", True, (245, 245, 220))
         # => change the coordonation of the ghost later or atleast check there coordination before give theme
         # image = pygame.transform.rotate(pacman_image, 0)
         
@@ -509,6 +526,8 @@ class Display:
         ghost_yellow = pygame.image.load("image/ghost_yellow.png")
         ghost_yellow = pygame.transform.scale(ghost_yellow,(80,45))
 
+        heart_image = pygame.image.load("image/heart.png")
+        heart_image = pygame.transform.scale(heart_image,(45,45))
 
         # pac_man_close = pygame.transform.scale(pac_close,(65,40))
         
@@ -524,6 +543,7 @@ class Display:
             {"ghost": inky,  "ghost_x": size[0]-1, "ghost_y": 0, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"I","time":None,"speed":1,"cheat": False,"image":ghost_blue},
             {"ghost": clyde,  "ghost_x": size[0]-1, "ghost_y": size[1]-1, "pos": None, "speed_x": 0, "speed_y": 0,"draw":"C","time":None,"speed":1,"cheat": False,"image":ghost_yellow} 
         ]
+        info_second_try = ghosts_list.copy()
         speed_pac_man = 3
         #here to test cheat mode 
        
@@ -542,8 +562,9 @@ class Display:
         y = 0
         food = None
         flag_picture = -1
+        counter_heart = 0 
         clock = pygame.time.Clock()
-     
+        list_heart = [60,100,140]
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -580,6 +601,7 @@ class Display:
                             score += 5
                             food[row][position_pacman[1]] = 20
                             if [row,position_pacman[1]] in super_pacgums:
+                                score += 95
                                 super_pacgums.remove([row,position_pacman[1]])
                                 for g in ghosts_list:
                                     g["ghost"].Flag_ability = False
@@ -594,6 +616,7 @@ class Display:
                             food[position_pacman[0]][col] = 20
                             if [position_pacman[0],col] in super_pacgums:
                                 super_pacgums.remove([position_pacman[0],col])
+                                score += 95
                                 for g in ghosts_list:
                                     g["ghost"].Flag_ability = False
                                     g["time"] = time.time()
@@ -639,7 +662,39 @@ class Display:
                         g["ghost"].time_live = time.time()
                         g["ghost"].is_dead = True
                 elif difx_subtraction <= size_cell//2 and dify_subtraction <= size_cell//2 and g["ghost"].Flag_ability:
-                    sys.exit()
+                    if len(list_heart) > 0:
+                        list_heart.pop(-1)
+                        position_pacman = [0, size[0]//2]
+                        step_x = 0
+                        step_y = 0
+                        pos = None
+                        pending_pos = None
+                        
+                        ghosts_list = info_second_try.copy()
+                        ghosts_list[0]["ghost_x"], ghosts_list[0]["ghost_y"] = 0, 0
+                        ghosts_list[1]["ghost_x"], ghosts_list[1]["ghost_y"] = 0, size[1]-1
+                        ghosts_list[2]["ghost_x"], ghosts_list[2]["ghost_y"] = size[0]-1, 0
+                        ghosts_list[3]["ghost_x"], ghosts_list[3]["ghost_y"] = size[0]-1, size[1]-1
+
+                        for item in ghosts_list:
+                            item["ghost_x"] = item["ghost_x"]
+                            item["ghost_y"] = item["ghost_y"]
+                            item["pos"] = None
+                            item["speed_x"] = 0
+                            item["speed_y"] = 0
+                            item["ghost"].speed_ghost_x = 0
+                            item["ghost"].speed_ghost_y = 0
+                            item["ghost"].p = 0
+                            item["ghost"].Flag_ability = True
+                            item["ghost"].is_dead = False
+                            position_ghosts, paths = blinky.ft_position_ghost(position_pacman, [item["ghost_y"], item["ghost_x"]])
+                            item["ghost"].paths = paths
+                            
+                        break
+                    else:
+                        # print("it do this ===========")
+                        sys.exit()
+
                 elif g["ghost"].Flag_ability:
                     screen.blit(g["image"],((g["ghost_x"]*size_cell)+g["speed_x"]-10,(g["ghost_y"]*size_cell)+g["speed_y"]+2))
                 else:
@@ -648,10 +703,16 @@ class Display:
 
                 p = g["ghost"].ft_render_paths_debug(g["ghost"].paths,show_path,p)
                     
+            # screen.blit(heart_image, (size_screen[0] - 60, size_screen[1] - 60))
+            # screen.blit(heart_image, (size_screen[0] - 100, size_screen[1] - 60))
+            # screen.blit(heart_image, (size_screen[0] - 140, size_screen[1] - 60))
+
+            score_surface = font.render(f"Score: {score}", True, (245, 245, 220))
+            screen.blit(score_surface, (10, size_screen[1] - 50))
             
-            # pacman = font.render("@", True, (255, 255, 0))
-            # screen.blit(image, (x+10, y+10))
             
+            for n in list_heart:
+                screen.blit(heart_image, (size_screen[0] - n, size_screen[1] - 60))
             if pos == [0,1]:
                 if flag_picture == -1:
                     screen.blit(pac_man_right, (x-10, y+2))
