@@ -180,15 +180,21 @@ class Ghosts:
         # if not self.paths:
         #     print("there is no path to go on it")
         #     return ghost_x, ghost_y   , [ 0, 0]
-        if not self.paths or self.p >= len(self.paths) - 1:
-            valid_moves = []
-            for d in self.directions:
-                if self.func.ft_check_walls(d, ghost_y, ghost_x):
-                    valid_moves.append(d)
-            if valid_moves:
-                return ghost_x, ghost_y, random.choice(valid_moves)
-            return ghost_x, ghost_y, [0, 0]
+        
+        #That what i comment
+        # if not self.paths or self.p >= len(self.paths) - 1:
+        #     valid_moves = []
+        #     for d in self.directions:
+        #         if self.func.ft_check_walls(d, ghost_y, ghost_x):
+        #             valid_moves.append(d)
+        #     if valid_moves:
+        #         return ghost_x, ghost_y, random.choice(valid_moves)
+        #     return ghost_x, ghost_y, [0, 0]
 
+
+        if not self.paths or self.p >= len(self.paths) - 1:
+            self.counter = 3 
+            return ghost_x, ghost_y, [0, 0]
         if self.counter == 4:
             self.p = 0
             self.counter = 0 
@@ -328,7 +334,17 @@ class Ghosts:
                 if not paths or len(paths) <= 1: 
                     n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
                     
-                if len(paths) >= 8:
+                # if len(paths) >= 8:
+                #     self.paths = paths
+                #That what i add 
+                if self.data.get("clyde_scatter", False):
+                    if len(paths) >= 12: 
+                        self.data["clyde_scatter"] = False
+                else:
+                    if len(paths) < 8:
+                        self.data["clyde_scatter"] = True
+             
+                if not self.data.get("clyde_scatter", False):
                     self.paths = paths
                 
                 else:
