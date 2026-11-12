@@ -1,6 +1,7 @@
 from mazegenerator import MazeGenerator
 from collections import deque
-import pygame, sys
+import pygame
+import sys
 import random
 import time
 
@@ -19,9 +20,7 @@ class Player:
         self.supper_pel = supper_pel
         
     def display(self,pos,food,super_pacgums):
-        pygame.init()
         black = (0, 0, 0)
-        font = pygame.font.Font(None, 40)
         cell_size = self.size_cell
         # normal_pel = pygame.image.load("image/normal_bel.png")
         # normal_pel = pygame.transform.scale(normal_pel,(80,45))
@@ -41,7 +40,7 @@ class Player:
                 if not (cell &1 and cell & 2 and cell & 4 and cell & 8):
                     if food is None:
                         self.screen.blit(self.normal_bel, (x+10, y+10))
-                        food = [row.copy() for row in self.generator.maze]
+                        food = [r.copy() for r in self.generator.maze]
                         food[0][0] = 20
                     elif [row,col] in super_pacgums: 
                         self.screen.blit(self.supper_pel,(x,y+10))
@@ -164,23 +163,32 @@ class Ghosts:
         if not paths:
             return p
         if show_path and p < len(paths):
+            font = pygame.font.Font(None, 40)
             for y in paths[p]:
                 row = y[0]
                 col = y[1]
 
-                font = pygame.font.Font(None, 40)
                 path = font.render("P", True, n[p % len(n)])
                 self.screen.blit(path, ((col * self.size_cell) + 5,(row * self.size_cell) + 10))
             p += 1
 
         return p
    
-
+ 
     def move_ghost(self, ghost_x,ghost_y):
 
-        if not self.paths:
-            print("there is no path to go on it")
+        # if not self.paths:
+        #     print("there is no path to go on it")
+        #     return ghost_x, ghost_y   , [ 0, 0]
+        if not self.paths or self.p >= len(self.paths) - 1:
+            valid_moves = []
+            for d in self.directions:
+                if self.func.ft_check_walls(d, ghost_y, ghost_x):
+                    valid_moves.append(d)
+            if valid_moves:
+                return ghost_x, ghost_y, random.choice(valid_moves)
             return ghost_x, ghost_y, [0, 0]
+
         if self.counter == 4:
             self.p = 0
             self.counter = 0 
@@ -261,7 +269,7 @@ class Ghosts:
             self.counter += 1
             if self.counter == 4:
                 n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
-                if not paths: 
+                if not paths or len(paths) <= 1: 
                     n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
                 self.paths = paths
         
@@ -302,7 +310,7 @@ class Ghosts:
             self.counter += 1
             if self.counter == 4:
                 n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
-                if not paths: 
+                if not paths or len(paths) <= 1: 
                     n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
                 self.paths = paths
         
@@ -317,7 +325,7 @@ class Ghosts:
             self.counter += 1
             if self.counter == 4:
                 n ,paths = self.ft_position_ghost(new_positon,[ghost_y,ghost_x])
-                if not paths: 
+                if not paths or len(paths) <= 1: 
                     n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
                     
                 if len(paths) >= 8:
@@ -325,9 +333,10 @@ class Ghosts:
                 
                 else:
                     n ,paths = self.ft_position_ghost([self.size[0]-1,0],[ghost_y,ghost_x])
+                    if not paths or len(paths) <= 1:
+                        n, paths = self.ft_position_ghost(position_pacman, [ghost_y, ghost_x])
                     self.paths = paths
-                
-
+    
         speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos = self.ft_speed_ghost_blinky(ghost_x,ghost_y,pos,new_positon)
         return speed_ghost_x,speed_ghost_y ,ghost_x, ghost_y,pos
 
@@ -406,7 +415,7 @@ class Display:
     def __init__(self):
         pass
 
-    def run(self):
+    def run(self,size):
         p = 1
         show_path = False
 
@@ -417,7 +426,7 @@ class Display:
         background = (15, 15, 20)
         speed_ghostx=0
         speed_ghosty=0
-        size=(14, 14)
+        # size=(14, 14)
         position_pacman = [0, size[0]//2]
         
         move = False
@@ -550,6 +559,10 @@ class Display:
         # for g in ghosts_list:
         #     g["cheat"] = True
         #     g["time"] = time.time()
+
+
+
+        complite = True
         for g in ghosts_list:
             position_ghosts,paths = blinky.ft_position_ghost(position_pacman,[g["ghost_y"],g["ghost_x"]])
             g["ghost"].paths = paths
@@ -607,6 +620,23 @@ class Display:
                                     g["ghost"].Flag_ability = False
                                     g["time"]  = time.time()
                                     g["speed"] = 0.5
+                        # elif not food:
+                        #     complite = True
+                        if food is not None:
+                            level_finished = True
+                            for r in range(size[0]):
+                                for c in range(size[1]):
+                                    cell = generator.maze[r][c]
+                                   
+                                    if not (cell & 1 and cell & 2 and cell & 4 and cell & 8):
+                                        if food[r][c] != 20: 
+                                            level_finished = False
+                                            break
+                                if not level_finished:
+                                    break
+                            
+                            if level_finished:
+                                return True
                     if abs(step_y) >= size_cell:
                         flag_picture *= -1
                         step_y = 0
@@ -621,6 +651,22 @@ class Display:
                                     g["ghost"].Flag_ability = False
                                     g["time"] = time.time()
                                     g["speed"] = 0.5
+                        # elif not food:
+                        if food is not None:
+                            level_finished = True
+                            for r in range(size[0]):
+                                for c in range(size[1]):
+                                    cell = generator.maze[r][c]
+                                    if not (cell & 1 and cell & 2 and cell & 4 and cell & 8):
+                                        if food[r][c] != 20:
+                                            level_finished = False
+                                            break
+                                if not level_finished:
+                                    break
+                            
+                            if level_finished:
+                                return True 
+                        
 
             x = (position_pacman[1] * size_cell) + step_x
             y = (position_pacman[0] * size_cell) + step_y
@@ -689,7 +735,7 @@ class Display:
                             item["ghost"].is_dead = False
                             position_ghosts, paths = blinky.ft_position_ghost(position_pacman, [item["ghost_y"], item["ghost_x"]])
                             item["ghost"].paths = paths
-                            
+                            complite = False
                         break
                     else:
                         # print("it do this ===========")
@@ -746,7 +792,25 @@ class Display:
             clock.tick(60)
 
         pygame.quit()   
-        sys.exit()
+        # sys.exit()
+        return False
+
+
+def main():
+    size = (14, 14)
+    
+    # Loop for 10 levels
+    for level in range(1, 11):
+        print(f"--- Starting Level {level} ---")
+ 
+        res = Display().run(size)
+        
+        if not res:
+            break
+            
+        size = (size[0] + 4, size[1] + 4)
+
+
 
 if __name__ == "__main__":
-    Display().run()
+    main()

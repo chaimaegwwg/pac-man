@@ -76,20 +76,25 @@ the first mission: --done--
     =>also i should fix when the pac-man touch the ghost
 
 
-fixed mission:
-    =>i feel the movement of the ghosts not normal at all and like when eated pac-gum when the ghost reached the goal what should happen should i take my same logic or not
-
-mission picture:
+mission picture:--done--
     =>add the picture for each one => still need to fix it 
 
-last mission:
+last mission:--done--
     =>do the visual of the score and live of the pac-man
 
 
-=> the easy one:
+
+fixed mission:--done--
+    =>i feel the movement of the ghosts not normal at all and like when eated pac-gum when the ghost reached the goal what should happen should i take my same logic or not
+
+
+=> the easy one:--done--
 add levels
 
-
+mission animation:
+    => add another animation for the pac-man he eated
+also should i test more 
+and when pac-man eat ghost should update the score and should i change the speed of pac-man and the ghost and when pac-man eat supper belle should the ghost return fast just fix time
 
 
 
